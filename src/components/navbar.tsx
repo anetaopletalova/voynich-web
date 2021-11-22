@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { AppBar, Box, Button, IconButton, Toolbar, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import './navbar.scss';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import classNames from 'classnames';
 
 const Navbar = () => {
     //const classes = useStyles();
     const [open, setOpen] = useState(false);
+    const location = useLocation();
 
     const handleOpen = () => {
         setOpen(true);
@@ -15,9 +17,13 @@ const Navbar = () => {
     const handleClose = () => {
         setOpen(false);
     };
+    console.log(location.pathname)
 
     return (
-        <AppBar position='static' color='primary'>
+        <AppBar position='static' color='primary'
+            className={classNames({
+                'hidden-navbar': location.pathname === '/login',
+            })}>
             <Toolbar>
                 <Typography variant="h6" component="div" className='title'>
                     <Link to="/stats" className='header-link'>Stats</Link>

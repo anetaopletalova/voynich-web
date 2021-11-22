@@ -3,13 +3,12 @@
     justify-content: flex-end;
 }
 
-.header-bar {
-    display: flex;
-    flex-direction: row;
+.hidden-navbar {
+    display: none !important;
 }
 
 .title {
-    margin-right: 15px !important;
+    margin-right: 15px;
 }
 
 .header-link {

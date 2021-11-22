@@ -6,7 +6,6 @@ import { getKeyByValue } from '../utils';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/auth';
 import { IApiResponse, ILoginData, ILoginResponse } from '../types/general';
-import { errorMonitor } from 'events';
 
 const baseURL = 'http://127.0.0.1:5000/';
 

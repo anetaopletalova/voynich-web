@@ -15,6 +15,7 @@ import { useApi } from '../../api/restApi';
 import './login.scss';
 import { AxiosError } from 'axios';
 import { Button } from '../../components/button';
+import { useMountEffect } from '../../helpers/hooks';
 
 const validationSchema = object({
     //add email
@@ -49,12 +50,12 @@ const Login = () => {
     const { reason } = decode(location.search.substring(1));
     const { authApi, pagesApi } = useApi();
 
-    // useEffect(() => {
-    //     // If logged in already, redirect to dashboard
-    //     if (authState.token) history.push(from);
-    //     // Remove query params. We needed them only on mount, and we got them now.
-    //     else window.history.replaceState(null, null, window.location.pathname);
-    // }, []);
+    useMountEffect(() => {
+        // If logged in already, redirect to dashboard
+        if (authState && authState.token) history.push('/');
+        // Remove query params. We needed them only on mount, and we got them now.
+        else window.history.replaceState(null, '', window.location.pathname);
+    });
 
     const getPages = async () => {
         const res = await pagesApi.getAll();
