@@ -6,6 +6,7 @@ import { getKeyByValue } from '../utils';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/auth';
 import { IApiResponse, ILoginData, ILoginResponse } from '../types/general';
+import { errorMonitor } from 'events';
 
 const baseURL = 'http://127.0.0.1:5000/';
 
@@ -47,22 +48,33 @@ export const deleteToken = () =>
     (instance.defaults.headers.common['Authorization'] = '');
 
 export const useApi = () => {
-    // const { refresh } = useAuth();
+    const { refresh } = useAuth();
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     const handleRequest = async <T>(request: Promise<AxiosResponse<T>>): Promise<IApiResponse<T>> => {
         try {
             const response = await request;
-            console.log(response)
+            console.log(response.data)
             return { ok: true, data: response.data };
         } catch (e) {
-            console.log(e)
             const error = e as AxiosError;
-            return { ok: false, error: error.response?.data };
+            if (error.response?.status === 401)
+                console.log(error)
+            try {
+                const didRefresh = await refresh();
+                if (didRefresh) {
+                    const response = await request;
+                    return { ok: true, data: response.data };
+                }
+            } catch (err) {
+                const error = err as AxiosError;
+                return handleError(error);
+            }
+            return handleError(error);
         }
     };
 
-    const handleError = (e, useSnackbar = true) => {
+    const handleError = (e: AxiosError, useSnackbar = true) => {
         if (useSnackbar) {
             if (
                 e.response?.data?.message &&
@@ -91,9 +103,9 @@ export const useApi = () => {
     const authApi = {
         logIn: (data: ILoginData) =>
             handleRequest(instance.post<ILoginResponse>('/login', {}, { auth: data })),
-        signUp: (data: any) => handleRequest(instance.post('user/client', data)),
+        //signUp: (data: any) => handleRequest(instance.post('user/client', data)),
         refreshToken: (refreshToken: string) =>
-            instance.post<any>('user/token/refresh', {}, { params: { refreshToken } }),
+            instance.post<any>('/refresh', { refreshToken }),
     };
 
     const pagesApi = {

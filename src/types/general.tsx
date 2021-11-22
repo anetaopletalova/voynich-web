@@ -11,6 +11,7 @@ export interface ILoginResponse {
     token: string;
     userId: number;
     email: string;
+    refreshToken: string;
 }
 
 export interface IApiResponse<T = unknown> {
@@ -23,4 +24,10 @@ export interface IApiError {
     error: string;
     statusCode: number;
     message: string;
+}
+
+export interface IDecodedToken {
+    exp: number;
+    uid: number;
+    type: string;
 }
