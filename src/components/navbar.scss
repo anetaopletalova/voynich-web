@@ -1,0 +1,18 @@
+.right-menu {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.header-bar {
+    display: flex;
+    flex-direction: row;
+}
+
+.title {
+    margin-right: 15px !important;
+}
+
+.header-link {
+    text-decoration: none;
+    color: white;
+}
