@@ -10,6 +10,8 @@ import Navbar from './components/navbar';
 import { ThemeProvider } from '@mui/material';
 import { theme } from './theme';
 import AuthenticatedRoute from './routes/authenticated';
+import { Toaster } from 'react-hot-toast';
+import './index.scss';
 
 
 const RootProviders = ({ children }) => (
@@ -27,14 +29,19 @@ const App = () => {
   return (
     <>
       <RootProviders>
-        <Navbar />
-        <Switch>
-          <AuthenticatedRoute path="/" exact component={Home} />
-          <AuthenticatedRoute path="/page" component={Page} />
-          <AuthenticatedRoute path="/stats" component={Stats} />
-          <Route path="/login" component={Login} />
-          {/* <Route path="/register" component={Register} /> */}
-        </Switch>
+        <div className='App'>
+        <Toaster position='bottom-right' />
+          <Navbar />
+          <div className="page-wrapper">
+            <Switch>
+              <AuthenticatedRoute path="/" exact component={Home} />
+              <AuthenticatedRoute path="/page" component={Page} />
+              <AuthenticatedRoute path="/stats" component={Stats} />
+              <Route path="/login" component={Login} />
+              {/* <Route path="/register" component={Register} /> */}
+            </Switch>
+          </div>
+        </div>
       </RootProviders>
     </>
   );

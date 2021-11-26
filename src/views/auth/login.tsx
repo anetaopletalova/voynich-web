@@ -1,24 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import {
-    useLocation,
-    useHistory,
-    Link,
-    Switch,
-    Route,
-    withRouter,
-} from 'react-router-dom';
-import { decode } from 'querystring';
+import React, { useState } from 'react';
+import { useHistory, } from 'react-router-dom';
 import { Form, Formik, Field, ErrorMessage } from 'formik';
 import { object, string } from 'yup';
 import { useAuth } from '../../context/auth';
 import { useApi } from '../../api/restApi';
 import './login.scss';
 import { AxiosError } from 'axios';
-import { Button } from '../../components/button';
 import { useMountEffect } from '../../helpers/hooks';
+import { Button, TextField } from '@mui/material';
+import { Label } from '@mui/icons-material';
 
 const validationSchema = object({
-    //add email
+    //add email() validation
     email: string().required(),
     password: string().required(),
 });
@@ -44,11 +37,8 @@ const LoginErrorMessages = {
 const Login = () => {
     const { authState, login } = useAuth();
     const history = useHistory();
-    const location = useLocation();
     const [error, setError] = useState<string>('');
-    // const { from } = location.state || { from: { pathname: '/' } };
-    const { reason } = decode(location.search.substring(1));
-    const { authApi, pagesApi } = useApi();
+    const { authApi } = useApi();
 
     useMountEffect(() => {
         // If logged in already, redirect to dashboard
@@ -57,13 +47,8 @@ const Login = () => {
         else window.history.replaceState(null, '', window.location.pathname);
     });
 
-    const getPages = async () => {
-        const res = await pagesApi.getAll();
-        console.log(res)
-
-    }
-
     const handleSubmit = async ({ email, password }) => {
+        console.log(email)
         setError('');
         try {
             const response = await authApi.logIn({
@@ -89,34 +74,39 @@ const Login = () => {
         }
     };
     return (
-        <>
+        <div className='login-container'>
             <Formik
                 onSubmit={handleSubmit}
                 validationSchema={validationSchema}
                 initialValues={initialValues}
             >
-                {(isSubmitting) => (
+                {(errors) => (
                     <Form>
-                        <Field name='email' label='Email' />
-                        <ErrorMessage name='email' />
-                        <Field
-                            name='password'
-                            type='password'
-                            label='Password'
-                        />
-                        <ErrorMessage name='password' />
+                        <span className='label'>Email</span>
+                        <div>
+                            <Field name='email' placeholder='Email' className='text-field' />
+                            <ErrorMessage name='email' className='error-message' component="div" />
+                        </div>
+                        <span className='label'>Password</span>
+                        <div>
+                            <Field
+                                name='password'
+                                type='password'
+                                placeholder="Password"
+                                className='text-field'
+                            //component={TextField}
+                            />
+                            <ErrorMessage name='password' className='error-message' component="div" />
+                        </div>
                         {/* <Link to='/login/forgottenPassword'>
                             Forgot password
                         </Link> */}
-                        <Button isSubmit >
-                            Finish
-                        </Button>
+                        <Button className='submit-button' color='secondary' variant="contained" type='submit'>Log In</Button>
                     </Form>
                 )}
             </Formik>
             <p className='login-error'>{error}</p>
-            <Button onClick={getPages}>Get Pages</Button>
-        </>
+        </div>
     );
 };
 
