@@ -1,9 +1,7 @@
 import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import Home from './home';
-import Page from './page';
-import Stats from './stats';
+
 import Login from './views/auth/login';
 import { AuthProvider } from './context/auth';
 import Navbar from './components/navbar';
@@ -12,6 +10,9 @@ import { theme } from './theme';
 import AuthenticatedRoute from './routes/authenticated';
 import { Toaster } from 'react-hot-toast';
 import './index.scss';
+import Home from './views/home';
+import Page from './page';
+import Stats from './stats';
 
 
 const RootProviders = ({ children }) => (
