@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useHistory, } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { Form, Formik, Field, ErrorMessage } from 'formik';
 import { object, string } from 'yup';
 import { useAuth } from '../../context/auth';
@@ -7,8 +7,7 @@ import { useApi } from '../../api/restApi';
 import './login.scss';
 import { AxiosError } from 'axios';
 import { useMountEffect } from '../../helpers/hooks';
-import { Button, TextField } from '@mui/material';
-import { Label } from '@mui/icons-material';
+import { Button } from '@mui/material';
 
 const validationSchema = object({
     //add email() validation
@@ -40,26 +39,25 @@ const Login = () => {
     const [error, setError] = useState<string>('');
     const { authApi } = useApi();
 
-    useMountEffect(() => {
+    useEffect(() => {
         // If logged in already, redirect to dashboard
         if (authState && authState.token) history.push('/');
         // Remove query params. We needed them only on mount, and we got them now.
         else window.history.replaceState(null, '', window.location.pathname);
-    });
+    }, [authState, history]);
 
     const handleSubmit = async ({ email, password }) => {
-        console.log(email)
         setError('');
         try {
             const response = await authApi.logIn({
                 username: email,
                 password,
             });
-            console.log(response)
+
             if (response.data && response.ok) {
                 login(response.data);
             }
-            // history.replace(from);
+            history.replace('/');
         } catch (e) {
             const error = e as AxiosError;
             if (error.response)

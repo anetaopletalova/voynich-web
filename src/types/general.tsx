@@ -31,3 +31,44 @@ export interface IDecodedToken {
     uid: number;
     type: string;
 }
+
+export interface IAddNotePost {
+    note: string;
+    classificationId: number;
+}
+
+export interface IPagesResponse {
+    pages: IPage[];
+}
+
+export interface IPage {
+    id: number;
+    name: string;
+}
+
+export interface IPageClassificationResponse {
+    pageClassifications: IPageClassification[];
+}
+
+export interface IPageClassification {
+    classificationId: number;
+    note: string;
+    description: string;
+    markings: IMarking[];
+    //visited: boolean;
+}
+
+export interface IClassificationDetailResponse {
+   
+}
+
+export interface IMarking {
+    classificationId: number;
+    description: string; 
+    height: number;
+    id: number;
+    pageId: number;
+    width: number;
+    x: number;
+    y: number;
+}

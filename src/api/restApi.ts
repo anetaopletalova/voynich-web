@@ -5,7 +5,7 @@ import applyCaseMiddleware from 'axios-case-converter';
 import { getKeyByValue } from '../utils';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/auth';
-import { IApiResponse, ILoginData, ILoginResponse } from '../types/general';
+import { IAddNotePost, IApiResponse, IClassificationDetailResponse, ILoginData, ILoginResponse, IPageClassificationResponse, IPagesResponse } from '../types/general';
 
 const baseURL = 'http://127.0.0.1:5000/';
 
@@ -53,7 +53,6 @@ export const useApi = () => {
     const handleRequest = async <T>(request: Promise<AxiosResponse<T>>): Promise<IApiResponse<T>> => {
         try {
             const response = await request;
-            console.log(response.data)
             return { ok: true, data: response.data };
         } catch (e) {
             const error = e as AxiosError;
@@ -91,14 +90,6 @@ export const useApi = () => {
         return { ok: false, data: e.response?.data };
     };
 
-    // const authApi = {
-    //     logIn: (data: ILogInData) =>
-    //         handleRequest<ILogInDataResponse>(instance.post('client/token/', {}, { auth: data })),
-    //     signUp: (data: ISignUpData) => handleRequest<ISignUpDataResponse>(instance.post('user/client/', data)),
-    //     refreshToken: (refreshToken: string) =>
-    //         instance.post<IRefreshTokenResponse>('user/token/refresh', {}, { params: { refreshToken } }),
-    // };
-
     const authApi = {
         logIn: (data: ILoginData) =>
             handleRequest(instance.post<ILoginResponse>('/login', {}, { auth: data })),
@@ -108,9 +99,17 @@ export const useApi = () => {
     };
 
     const pagesApi = {
-        getAll: () => handleRequest(instance.get('/pages')),
+        getAll: () => handleRequest<IPagesResponse>(instance.get('/pages')),
+        get: (pageId: number) => handleRequest<IPageClassificationResponse>(instance.get(`/page/${pageId}`)),
     }
 
-    return { authApi, pagesApi }
+    const classificationApi = {
+        getDetails: (classificationId: number) => handleRequest<IClassificationDetailResponse>(instance.get(`/classification/${classificationId}`)),
+        visit: (userId: number, classificationId: number) =>
+            handleRequest(instance.post(`/visit/${userId}`, { classificationId })), 
+        addNote:(userId: number, data: IAddNotePost) => handleRequest(instance.post(`/note/${userId}`, data))
+    }
+
+    return { authApi, pagesApi, classificationApi }
 
 }

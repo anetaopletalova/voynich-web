@@ -1,8 +1,7 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { decodeToken, isExpired } from 'react-jwt';
 import { deleteToken, setToken, useApi } from '../api/restApi';
-import { useEffect } from 'react-router/node_modules/@types/react';
 import { IDecodedToken, ILoginResponse } from '../types/general';
 import { useMountEffect } from '../helpers/hooks';
 
@@ -10,15 +9,6 @@ interface IAuthState {
     userId: number;
     token: string;
     email: string;
-}
-
-interface IAuthLoginData extends IAuthState {
-    refreshToken: string;
-}
-
-interface IRefreshResult {
-    successful: boolean;
-    accessToken?: string;
 }
 
 interface IAuthContext {
@@ -56,6 +46,7 @@ export const AuthProvider = ({ children }) => {
     useMountEffect(() => {
         //used when refresh token is expired
         const fetchData = async token => {
+            console.log('FETCHING', token)
             try {
                 const response = await authApi.refreshToken(token);
                 console.log(response.status)

@@ -11,7 +11,7 @@
     height: 100%;
     overflow-y: auto;
     flex: 1;
-    margin: 0 auto;   
+    margin: 0;
 }
 
 html {
@@ -19,9 +19,9 @@ html {
     font-family: Arial, sans-serif;
 }
 
-body {
-    margin: 0 auto;
-}
+// body {
+//     margin: 0 auto;
+// }
 
 form {
     margin: 0;

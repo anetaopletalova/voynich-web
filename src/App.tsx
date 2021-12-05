@@ -11,7 +11,7 @@ import AuthenticatedRoute from './routes/authenticated';
 import { Toaster } from 'react-hot-toast';
 import './index.scss';
 import Home from './views/home';
-import Page from './page';
+import Page from './views/pages/page';
 import Stats from './stats';
 
 
