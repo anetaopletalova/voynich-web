@@ -51,5 +51,4 @@ const createStyles = (theme: Theme) => (
     }
 );
 
-
 export default Navbar;

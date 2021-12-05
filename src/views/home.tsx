@@ -9,7 +9,6 @@ interface IPageContainerProps {
     page: IPage;
 }
 
-
 const Home = () => {
     const { pagesApi } = useApi();
     const [pages, setPages] = useState<IPage[]>([]);
