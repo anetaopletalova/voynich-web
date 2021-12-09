@@ -1,11 +1,43 @@
 import { Theme, useTheme } from '@emotion/react';
-import { flexbox, style } from '@mui/system';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApi } from '../../api/restApi';
 import ClassificationAccordion from '../../components/accordion';
 import { useMountEffect } from '../../helpers/hooks';
-import { IPage, IPageClassification } from '../../types/general';
+import { IMarking, IPage, IPageClassification } from '../../types/general';
+import { Stage, Layer, Rect, Image } from 'react-konva';
+import { KonvaEventObject } from 'konva/lib/Node';
+
+interface IPageImageProps {
+    imgSource: string,
+    height: number,
+}
+
+const PageImage: React.FC<IPageImageProps> = ({ imgSource, height }) => {
+    const [img, setImg] = useState<any>();
+    const [newWidth, setNewWidth] = useState<number>();
+
+    useMountEffect(() => {
+        const image = new window.Image();
+        image.src = imgSource;
+        image.onload = () => {
+            setImg(image);
+
+        };
+    });
+
+    useEffect(() => {
+        if (img) {
+            const ratio = img.height / img.width;
+            const scaledWidth = height / ratio;
+            setNewWidth(scaledWidth);
+        }
+    }, [img, height])
+
+    return (img ? <Image image={img} height={height} width={newWidth} /> : null);
+}
+
+
 
 const Page = () => {
     const location = useLocation<IPage>();
@@ -17,9 +49,11 @@ const Page = () => {
     const [drawCtx, setDrawCtx] = useState<CanvasRenderingContext2D | null>(null);
     const [imgWidth, setImgWidth] = useState<number>();
     const [imgHeight, setImgHeight] = useState<number>();
+    const [polygons, setPolygons] = useState<IMarking[]>();
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme, imgHeight && imgHeight * 0.7, imgWidth && imgWidth * 0.7), [theme, imgHeight, imgWidth]);
-
+    const [pageHeight, setPageHeight] = useState(window.innerHeight);
+    const [pageWidth, setPageWidth] = useState(0);
 
     useMountEffect(() => {
         const loadClassifications = async (pageId: number) => {
@@ -36,59 +70,77 @@ const Page = () => {
     })
 
     useEffect(() => {
-        if (location.state && imageRef.current) {
-            const ctx = imageRef.current?.getContext('2d');
-            const img = new Image();
-            img.src = `/images/${location.state.name}`;
+        selectedClassification && setPolygons(selectedClassification.markings);
+    }, [selectedClassification])
 
-            if (ctx) {
-                img.onload = () => {      
-                    ctx.canvas.width = img.width;
-                    ctx.canvas.height = img.height;
-                    setImgHeight(img.height);
-                    setImgWidth(img.width);
-                    ctx.drawImage(img, 0, 0);
-                }
+
+    const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
+        e.evt.preventDefault();
+        var scaleBy = 1.02;
+        //current target je scale, target je rect
+        var oldScale = e.currentTarget.scaleX();
+        var pointer = e.currentTarget.getRelativePointerPosition();
+        if (pointer) {
+            var mousePointTo = {
+                x: (pointer.x - e.currentTarget.x()) / oldScale,
+                y: (pointer.y - e.currentTarget.y()) / oldScale,
+            };
+            //pointer je pozice mysi v obrazku
+            console.log(pointer)
+            console.log(mousePointTo);
+            // how to scale? Zoom in? Or zoom out?
+            let direction = e.evt.deltaY > 0 ? -1 : 1;
+            //console.log('dir', direction)
+
+            // when we zoom on trackpad, e.evt.ctrlKey is true
+            // in that case lets revert direction
+            if (e.evt.ctrlKey) {
+                direction = -direction;
             }
-        }
-    }, [imageRef, location]);
 
-    useEffect(() => {
-        const drawContext = canvasRef.current?.getContext('2d');
-        if (drawContext && imgHeight && imgWidth) {
-            drawContext.canvas.width = imgWidth;
-            drawContext.canvas.height = imgHeight;
-            setDrawCtx(drawContext);
-        }
-    }, [imgWidth, imgHeight, canvasRef])
+            var newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
 
-    useEffect(() => {
-        if (drawCtx) {
-            drawCtx.clearRect(0, 0, drawCtx.canvas.width, drawCtx.canvas.height);
-            if (selectedClassification) {
-                selectedClassification.markings.forEach(item => {
-                    console.log('draw', item)
-                    const { x, y, width, height } = item;
-                    drawCtx.beginPath();
-                    drawCtx.moveTo(x, y);
-                    drawCtx.lineTo(x, y + height);
-                    drawCtx.lineTo(x + width, y + height);
-                    drawCtx.lineTo(x + width, y);
-                    drawCtx.lineTo(x, y);
-                    drawCtx.strokeStyle = 'green';
-                    drawCtx.lineWidth = 2;
-                    drawCtx.stroke();
-                })
-            }
+            e.currentTarget.scale({ x: newScale, y: newScale });
+
+            var newPos = {
+                x: pointer.x - mousePointTo.x * newScale,
+                y: pointer.y - mousePointTo.y * newScale,
+            };
+
+            e.currentTarget.position(newPos);
         }
-    }, [drawCtx, selectedClassification])
+    };
+
+    useLayoutEffect(() => {
+        const updateSize = () => {
+            console.log(document.querySelector('#page')?.clientWidth);
+            setPageWidth(document.querySelector('#page')?.clientWidth || 0);
+            setPageHeight(window.innerHeight - 64);
+        }
+        window.addEventListener('resize', updateSize);
+        updateSize();
+        return () => window.removeEventListener('resize', updateSize);
+    }, [])
 
 
     return (
         <div style={styles.content as React.CSSProperties}>
-            <div style={styles.canvasWrapper as React.CSSProperties}>
-                <canvas ref={imageRef} width={imgWidth} height={imgHeight} style={styles.canvas as React.CSSProperties} />
-                <canvas ref={canvasRef} width={imgWidth} height={imgHeight} style={styles.drawCanvas as React.CSSProperties} />
+            <div id='page' style={styles.pageContent}>
+                <Stage width={pageWidth} height={pageHeight} onWheel={handleWheel} draggable={true} >
+                    <Layer>
+                        <PageImage imgSource={`/images/${location.state.name}`} height={pageHeight} />
+                        {polygons?.map(polygon => <Rect
+                            x={polygon.x}
+                            y={polygon.y}
+                            width={polygon.width}
+                            height={polygon.height}
+                            strokeWidth={1}
+                            stroke="red"
+                            shadowBlur={5}
+                            onClick={() => console.log('ee')}
+                        />)}
+                    </Layer>
+                </Stage>
             </div>
             <div style={styles.accordionContainer}>
                 <ClassificationAccordion classifications={classifications} onClassificationSelect={setSelectedClassification} />
@@ -125,6 +177,10 @@ const createStyles = (theme, imgHeight, imgWidth) => (
             marginTop: '25px',
             width: '500px',
         },
+        pageContent: {
+            flex: 1,
+            height: '100%',
+        }
     }
 );
 
