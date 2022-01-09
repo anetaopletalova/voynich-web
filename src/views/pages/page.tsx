@@ -27,8 +27,9 @@ const PageImage: React.FC<IPageImageProps> = ({ imgSource, height }) => {
     });
 
     useEffect(() => {
-        if (img) {
+        if (img) {          
             const ratio = img.height / img.width;
+            console.log(img.height);
             const scaledWidth = height / ratio;
             setNewWidth(scaledWidth);
         }
@@ -41,25 +42,26 @@ const PageImage: React.FC<IPageImageProps> = ({ imgSource, height }) => {
 
 const Page = () => {
     const location = useLocation<IPage>();
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const imageRef = useRef<HTMLCanvasElement>(null);
-    const { pagesApi } = useApi();
+    // const canvasRef = useRef<HTMLCanvasElement>(null);
+    // const imageRef = useRef<HTMLCanvasElement>(null);
+    const { classificationApi } = useApi();
     const [classifications, setClassifications] = useState<IPageClassification[]>([]);
     const [selectedClassification, setSelectedClassification] = useState<IPageClassification | null>(null);
-    const [drawCtx, setDrawCtx] = useState<CanvasRenderingContext2D | null>(null);
-    const [imgWidth, setImgWidth] = useState<number>();
+    // const [drawCtx, setDrawCtx] = useState<CanvasRenderingContext2D | null>(null);
+    // const [imgWidth, setImgWidth] = useState<number>();
     const [imgHeight, setImgHeight] = useState<number>();
     const [polygons, setPolygons] = useState<IMarking[]>();
     const theme = useTheme();
-    const styles = useMemo(() => createStyles(theme, imgHeight && imgHeight * 0.7, imgWidth && imgWidth * 0.7), [theme, imgHeight, imgWidth]);
+    const styles = useMemo(() => createStyles(), []);
     const [pageHeight, setPageHeight] = useState(window.innerHeight);
     const [pageWidth, setPageWidth] = useState(0);
 
     useMountEffect(() => {
         const loadClassifications = async (pageId: number) => {
-            const res = await pagesApi.get(pageId);
+            //TODO pagination
+            const res = await classificationApi.get(pageId, 1);
             if (res.ok && res.data) {
-                setClassifications(res.data.pageClassifications)
+                setClassifications(res.data)
             }
         }
 
@@ -130,8 +132,9 @@ const Page = () => {
                     <Layer>
                         <PageImage imgSource={`/images/${location.state.name}`} height={pageHeight} />
                         {polygons?.map(polygon => <Rect
-                            x={polygon.x}
-                            y={polygon.y}
+                            //TODO FIX THIS THING
+                            x={polygon.x * 0.7}
+                            y={polygon.y * 0.7}
                             width={polygon.width}
                             height={polygon.height}
                             strokeWidth={1}
@@ -149,13 +152,8 @@ const Page = () => {
     );
 };
 
-const createStyles = (theme, imgHeight, imgWidth) => (
+const createStyles = () => (
     {
-        canvasWrapper: {
-            transform: 'scale(0.7)',
-            // width: imgWidth,
-            // height: imgHeight,
-        },
         canvas: {
             position: 'absolute',
             top: 20,

@@ -35,6 +35,12 @@ export interface IDecodedToken {
 export interface IAddNotePost {
     note: string;
     classificationId: number;
+    pageId: number;
+}
+
+export interface IEditNotePost {
+    note: string;
+    id: number;
 }
 
 export interface IPagesResponse {
@@ -55,7 +61,11 @@ export interface IPageClassification {
     note: string;
     description: string;
     markings: IMarking[];
-    //visited: boolean;
+    visited: boolean;
+    favorite: number | null;
+    createdAt: string;
+    userName: string;
+    userId: number;
 }
 
 export interface IClassificationDetailResponse {
@@ -71,4 +81,8 @@ export interface IMarking {
     width: number;
     x: number;
     y: number;
+}
+
+export interface IAddToFavoritesResponse {
+    favoriteId: number;
 }

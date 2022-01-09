@@ -20,8 +20,8 @@ const Home = () => {
         const loadPages = async () => {
             const res = await pagesApi.getAll();
             if (res.ok && res.data) {
-                setPages(res.data.pages);
-                setFilteredPages(res.data.pages);
+                setPages(res.data);
+                setFilteredPages(res.data);
             }
         };
 
