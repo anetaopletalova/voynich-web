@@ -6,15 +6,16 @@ import { useApi } from '../api/restApi';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
-import { Divider, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Button, Divider, IconButton, InputAdornment, TextField } from '@mui/material';
 import { useAuth } from '../context/auth';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from '@mui/icons-material/Star';
 import EditIcon from '@mui/icons-material/Edit';
 import StickyNote2Icon from '@mui/icons-material/StickyNote2';
-import CheckIcon from '@mui/icons-material/Check';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { isEmptyObject } from '../utils';
 
 interface IClassificationAccordionProps {
     classifications: IPageClassification[];
@@ -30,13 +31,25 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
     const { authState } = useAuth();
     const [openNote, setOpenNote] = useState(false);
     const [note, setNote] = useState('');
+    const [isEditMode, setIsEditMode] = useState(false);
     //try use memo
     const [currentClassifications, setCurrentClassifications] = useState<IPageClassification[]>(classifications);
 
 
+
+    const refresh = (updatedItem: IPageClassification) => {
+        const updatedClassification = currentClassifications.map(obj => {
+            if (obj.classificationId === updatedItem.classificationId)
+                return updatedItem;
+            return obj;
+        });
+        setCurrentClassifications(updatedClassification);
+    }
+
     const handleChange =
         (selected: IPageClassification) => async (event: React.SyntheticEvent, newExpanded: boolean) => {
             setOpenNote(false);
+            setIsEditMode(false);
             setExpanded(newExpanded ? selected.classificationId : false);
             onClassificationSelect(newExpanded ? selected : null);
             if (!selected.visited && authState) {
@@ -59,55 +72,89 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
 
     const saveNote = async (item: IPageClassification) => {
         if (!authState) return;
-        const payload = {
-            note: note,
-            classificationId: item.classificationId,
-            //TODO fix!
-            pageId: 4,
-        };
-        const res = await notesApi.addNote(authState.userId, payload);
 
-        if (res.ok) {
-            //TODO aktualizaovat poznamku v currentClassifications!
-            setNote('');
-            setOpenNote(false);
+        if (isEditMode && item.note) {
+            const payload = {
+                text: note,
+                noteId: item.note.id,
+            };
+            const res = await notesApi.editNote(authState.userId, payload);
+            if (res.ok && res.data) {
+                const updated = {
+                    ...item,
+                    note: res.data,
+                };
+                refresh(updated);
+                setIsEditMode(false);
+            }
+        } else {
+            const payload = {
+                text: note,
+                classificationId: item.classificationId,
+                pageId: item.pageId,
+            };
+            const res = await notesApi.addNote(authState.userId, payload);
+            if (res.ok && res.data) {
+                const updated = {
+                    ...item,
+                    note: res.data,
+                };
+                refresh(updated);
+
+            }
         }
+        setNote('');
+        setOpenNote(false);
     }
-
-    //TODO EDIT AND DELETE NOTE -> REFAKTORING
 
     const addToFavorites = async (e, item: IPageClassification) => {
         e.preventDefault();
         e.stopPropagation();
-        //TODO refactor update method -> pouzit ji i pro aktualizaci poznamky!!!
         if (authState) {
             if (!item.favorite) {
                 const res = await classificationApi.favorites.add(authState.userId, item.classificationId);
-                console.log(res);
                 if (res.ok && res.data) {
-                    const updatedClassification = currentClassifications.map(obj => {
-                        if (obj.classificationId === item.classificationId && res.data)
-                            return {
-                                ...obj,
-                                favorite: res.data.favoriteId,
-                            }
-                        return obj
-                    });
-                    setCurrentClassifications(updatedClassification);
+                    const updated = {
+                        ...item,
+                        favorite: res.data.favoriteId,
+                    };
+                    refresh(updated);
                 }
             } else {
                 const res = await classificationApi.favorites.remove(authState.userId, item.favorite);
                 if (res.ok) {
-                    const updatedClassification = currentClassifications.map(obj => {
-                        if (obj.classificationId === item.classificationId)
-                            return {
-                                ...obj,
-                                favorite: null,
-                            }
-                        return obj
-                    });
-                    setCurrentClassifications(updatedClassification);
+                    const updated = {
+                        ...item,
+                        favorite: null,
+                    };
+                    refresh(updated);
                 }
+            }
+        }
+    }
+
+    const editNote = async (item: IPageClassification) => {
+        setOpenNote(true);
+        setIsEditMode(true);
+        if (item.note) {
+            setNote(item?.note?.text);
+        }
+    }
+
+    const deleteNote = async (item: IPageClassification) => {
+        if (!authState) return;
+
+        if (item.note) {
+            const res = await notesApi.deleteNote(authState.userId, item.note.id);
+
+            if (res.ok) {
+                const updated = {
+                    ...item,
+                    note: null,
+                };
+                refresh(updated);
+                setNote('');
+                setOpenNote(false);
             }
         }
     }
@@ -127,11 +174,11 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
                                 <div style={styles.row}>
                                     #{item.classificationId}
                                     <div style={styles.row}>
-                                        {item.note &&
+                                        {!isEmptyObject(item.note) &&
                                             <div onClick={(e) => addNote(e, item)}>
                                                 <StickyNote2Icon />
-                                            </div>}
-
+                                            </div>
+                                        }
                                         <div onClick={(e) => addToFavorites(e, item)}>
                                             {item.favorite ?
                                                 <StarIcon color='primary' /> : <StarBorderIcon />}
@@ -143,7 +190,26 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
                         </AccordionSummary>
                         <AccordionDetails>
                             <div style={styles.fullWidth as React.CSSProperties}>
-                                {!item.note && !openNote &&
+                                {!isEmptyObject(item.note) && !openNote && <div>
+                                    {item.note?.text}
+                                    <IconButton
+                                        color='primary'
+                                        onClick={() => editNote(item)}
+                                        component="span"
+                                        style={styles.addNoteIcon as React.CSSProperties}
+                                    >
+                                        <EditIcon />
+                                    </IconButton>
+                                    <IconButton
+                                        color='primary'
+                                        onClick={() => deleteNote(item)}
+                                        component="span"
+                                        style={styles.addNoteIcon as React.CSSProperties}
+                                    >
+                                        <DeleteForeverIcon />
+                                    </IconButton>
+                                </div>}
+                                {isEmptyObject(item.note) && !openNote &&
                                     (<IconButton
                                         color='secondary'
                                         onClick={() => setOpenNote(true)}
@@ -151,7 +217,8 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
                                         style={styles.addNoteIcon as React.CSSProperties}
                                     >
                                         <NoteAddIcon />
-                                    </IconButton>)}
+                                    </IconButton>
+                                    )}
                                 {openNote &&
                                     <div style={styles.fullWidth as React.CSSProperties}>
                                         <TextField
@@ -166,29 +233,21 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <IconButton
-                                                            //TODO change color to very light
-                                                            color={note ? 'primary' : 'default'}
-                                                            onClick={() => saveNote(item)}
+                                                            color='primary'
+                                                            onClick={() => { setNote('') }}
                                                             component="span"
                                                             style={styles.addNoteIcon as React.CSSProperties}
                                                         >
-                                                            <CheckIcon />
+                                                            <CloseIcon />
                                                         </IconButton>
                                                     </InputAdornment>
                                                 ),
                                             }}
                                         />
-                                        <IconButton
-                                            color='primary'
-                                            onClick={() => { setOpenNote(false); setNote('') }}
-                                            component="span"
-                                            style={styles.addNoteIcon as React.CSSProperties}
-                                        >
-                                            <CloseIcon />
-                                        </IconButton>
-                                    </div>}
-                                {/* TODO zmenit zobrazeni note + ikonka k editaci a odstraneni */}
-                                {item.note}
+                                        <Button
+                                            onClick={() => saveNote(item)}>Save note</Button>
+                                    </div>
+                                }
                                 {item.description}
                                 {item.markings.map((marking, index) => (<div key={index}>{marking.description}</div>))}
                             </div>

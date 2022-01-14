@@ -33,14 +33,14 @@ export interface IDecodedToken {
 }
 
 export interface IAddNotePost {
-    note: string;
+    text: string;
     classificationId: number;
     pageId: number;
 }
 
 export interface IEditNotePost {
-    note: string;
-    id: number;
+    text: string;
+    noteId: number;
 }
 
 export interface IPagesResponse {
@@ -58,7 +58,7 @@ export interface IPageClassificationResponse {
 
 export interface IPageClassification {
     classificationId: number;
-    note: string;
+    note: INote | null;
     description: string;
     markings: IMarking[];
     visited: boolean;
@@ -66,6 +66,15 @@ export interface IPageClassification {
     createdAt: string;
     userName: string;
     userId: number;
+    pageId: number;
+}
+
+
+export interface INote {
+    classificationId: number;
+    id: number;
+    text: string;
+    pageId: number;
 }
 
 export interface IClassificationDetailResponse {
