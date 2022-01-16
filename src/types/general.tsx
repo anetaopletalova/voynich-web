@@ -69,17 +69,12 @@ export interface IPageClassification {
     userId: number;
     pageId: number;
 }
- 
 
 export interface INote {
     classificationId: number;
     id: number;
     text: string;
     pageId: number;
-}
-
-export interface IClassificationDetailResponse {
-   
 }
 
 export interface IMarking {
@@ -98,8 +93,8 @@ export interface IAddToFavoritesResponse {
 }
 
 export interface IClassificationParameters {
-    pageId: number; 
     page: number; 
+    pageId?: number; 
     dateTo?: string; 
     withNote?: boolean; 
     favorite?: boolean;

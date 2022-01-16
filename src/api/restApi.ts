@@ -127,6 +127,8 @@ export const useApi = () => {
             remove: (userId: number, favoriteId: number) =>
                 handleRequest(instance.delete(`/favorite/${userId}`, { params: { favoriteId } })),
         },
+        getAll: (userId: number, params: IClassificationParameters) => 
+            handleRequest<IPageClassificationResponse>(instance.get(`/classification/all/${userId}`, { params })),
         // getAllByUser: (userName: string, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/user`, { params: { page, userName } })),
         // getAllWithNote: (userId: number, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/note/${userId}`, { params: { page } })),
         // getAllFavorite: (userId: number, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/favorite/${userId}`, { params: { page } })),

@@ -16,7 +16,7 @@ const Navbar = () => {
                         <Link to="/" style={styles.headerLink}>Home</Link>
                     </Typography>
                     <Typography variant="h6" component="div" style={styles.title}>
-                        <Link to="/stats" style={styles.headerLink}>Statistics</Link>
+                        <Link to="/myList" style={styles.headerLink}>My List</Link>
                     </Typography>
                 </div>
                 <div>

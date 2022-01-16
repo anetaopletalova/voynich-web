@@ -12,8 +12,7 @@ import { Toaster } from 'react-hot-toast';
 import './index.scss';
 import Home from './views/home';
 import Page from './views/pages/page';
-import Stats from './stats';
-
+import MyList from './stats';
 
 const RootProviders = ({ children }) => (
   <Router>
@@ -37,7 +36,7 @@ const App = () => {
             <Switch>
               <AuthenticatedRoute path="/" exact component={Home} />
               <AuthenticatedRoute path="/page" component={Page} />
-              <AuthenticatedRoute path="/stats" component={Stats} />
+              <AuthenticatedRoute path="/myList" component={MyList} />
               <Route path="/login" component={Login} />
               {/* <Route path="/register" component={Register} /> */}
             </Switch>
