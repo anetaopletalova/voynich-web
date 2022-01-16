@@ -10,6 +10,7 @@ import {
     IAddToFavoritesResponse,
     IApiResponse,
     IClassificationDetailResponse,
+    IClassificationParameters,
     IEditNotePost,
     ILoginData,
     ILoginResponse,
@@ -114,8 +115,9 @@ export const useApi = () => {
     }
 
     const classificationApi = {
-        get: (pageId: number, page: number, dateTo?: string) => handleRequest<IPageClassificationResponse>(instance.get(`/page/${pageId}`, { params: { page, dateTo } })),
-        getDetails: (classificationId: number) => handleRequest<IClassificationDetailResponse>(instance.get(`/classification/${classificationId}`)),
+        getByPageId: (userId: number, params: IClassificationParameters) => 
+            handleRequest<IPageClassificationResponse>(instance.get(`/classification/page/${userId}`, { params })),
+        // getDetails: (classificationId: number) => handleRequest<IClassificationDetailResponse>(instance.get(`/classification/${classificationId}`)),
         visit: (userId: number, classificationId: number) =>
             handleRequest(instance.post(`/visit/${userId}`, { classificationId })),
         favorites:
@@ -125,9 +127,9 @@ export const useApi = () => {
             remove: (userId: number, favoriteId: number) =>
                 handleRequest(instance.delete(`/favorite/${userId}`, { params: { favoriteId } })),
         },
-        getAllByUser: (userName: string, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/user`, { params: { page, userName } })),
-        getAllWithNote: (userId: number, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/note/${userId}`, { params: { page } })),
-        getAllFavorite: (userId: number, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/favorite/${userId}`, { params: { page } })),
+        // getAllByUser: (userName: string, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/user`, { params: { page, userName } })),
+        // getAllWithNote: (userId: number, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/note/${userId}`, { params: { page } })),
+        // getAllFavorite: (userId: number, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/favorite/${userId}`, { params: { page } })),
     }
 
     const notesApi = {

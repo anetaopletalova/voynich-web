@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { useApi } from '../../api/restApi';
 import ClassificationAccordion from '../../components/accordion';
 import { useMountEffect } from '../../helpers/hooks';
-import { IMarking, IPage, IPageClassification } from '../../types/general';
+import { IClassificationParameters, IMarking, IPage, IPageClassification } from '../../types/general';
 import { Stage, Layer, Rect, Image } from 'react-konva';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { Checkbox, IconButton, TextField } from '@mui/material';
@@ -14,6 +14,7 @@ import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import { toServerDateFormat } from '../../utils';
 import CloseIcon from '@mui/icons-material/Close';
+
 
 interface IPageImageProps {
     imgSource: string,
@@ -46,7 +47,6 @@ const PageImage: React.FC<IPageImageProps> = ({ imgSource, height }) => {
 }
 
 
-
 const Page = () => {
     const location = useLocation<IPage>();
     // const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -69,12 +69,13 @@ const Page = () => {
     const [onlyFavorite, setOnlyFavorite] = useState(false);
     const [dateTo, setDateTo] = useState(new Date());
     const { authState } = useAuth();
+    const defaultParams = { pageId, page, dateTo: toServerDateFormat(dateTo) };
 
 
     //TODO probably rfc into just one endpoint with different params for filters
-    const loadClassifications = async (page: number) => {
-        if (pageId) {
-            const res = await classificationApi.get(pageId, page, toServerDateFormat(dateTo));
+    const loadClassifications = async (page: number, params: IClassificationParameters = defaultParams) => {
+        if (pageId && authState) {
+            const res = await classificationApi.getByPageId(authState.userId, params);
             if (res.ok && res.data) {
                 // console.log(res.data.items);
                 setClassifications(res.data.items);
@@ -87,7 +88,7 @@ const Page = () => {
 
     const loadClassificationsWithNote = async (page: number) => {
         if (authState) {
-            const res = await classificationApi.getAllWithNote(authState.userId, page);
+            const res = await classificationApi.getByPageId(authState.userId, { pageId, page, dateTo: toServerDateFormat(dateTo), withNote: true });
             if (res.ok && res.data) {
                 // console.log(res.data.items);
                 setClassifications(res.data.items);
@@ -100,7 +101,7 @@ const Page = () => {
 
     const loadFavoriteClassifications = async (page: number) => {
         if (authState) {
-            const res = await classificationApi.getAllFavorite(authState.userId, page);
+            const res = await classificationApi.getByPageId(authState.userId, { pageId, page, dateTo: toServerDateFormat(dateTo), favorite: true });
             if (res.ok && res.data) {
                 // console.log(res.data.items);
                 setClassifications(res.data.items);
@@ -123,13 +124,13 @@ const Page = () => {
     //TODO all filtering here
     useEffect(() => {
         setPage(0);
+        let params: IClassificationParameters = defaultParams;
         if (onlyWithNote) {
-            loadClassificationsWithNote(0);
+            params = { pageId, page, dateTo: toServerDateFormat(dateTo), withNote: true };
         } else if (onlyFavorite) {
-            loadFavoriteClassifications(0);
-        } else {
-            loadClassifications(0);
-        }
+            params = { pageId, page, dateTo: toServerDateFormat(dateTo), favorite: true };
+        } 
+        loadClassifications(0, params);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [onlyWithNote, onlyFavorite, dateTo])
 
@@ -220,7 +221,7 @@ const Page = () => {
                     color='primary'
                     onClick={() => setDateTo(new Date())}
                     component="span"
-                    //style={styles.addNoteIcon as React.CSSProperties}
+                //style={styles.addNoteIcon as React.CSSProperties}
                 >
                     <CloseIcon />
                 </IconButton>

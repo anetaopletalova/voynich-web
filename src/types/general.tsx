@@ -96,3 +96,12 @@ export interface IMarking {
 export interface IAddToFavoritesResponse {
     favoriteId: number;
 }
+
+export interface IClassificationParameters {
+    pageId: number; 
+    page: number; 
+    dateTo?: string; 
+    withNote?: boolean; 
+    favorite?: boolean;
+    userName?: string;
+}
