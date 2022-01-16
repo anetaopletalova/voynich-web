@@ -1,5 +1,5 @@
-import { Theme, useTheme } from '@emotion/react';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useTheme } from '@emotion/react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApi } from '../../api/restApi';
 import ClassificationAccordion from '../../components/accordion';
@@ -7,6 +7,13 @@ import { useMountEffect } from '../../helpers/hooks';
 import { IMarking, IPage, IPageClassification } from '../../types/general';
 import { Stage, Layer, Rect, Image } from 'react-konva';
 import { KonvaEventObject } from 'konva/lib/Node';
+import { Checkbox, IconButton, TextField } from '@mui/material';
+import { useAuth } from '../../context/auth';
+import DatePicker from '@mui/lab/DatePicker';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import { toServerDateFormat } from '../../utils';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface IPageImageProps {
     imgSource: string,
@@ -27,7 +34,7 @@ const PageImage: React.FC<IPageImageProps> = ({ imgSource, height }) => {
     });
 
     useEffect(() => {
-        if (img) {          
+        if (img) {
             const ratio = img.height / img.width;
             console.log(img.height);
             const scaledWidth = height / ratio;
@@ -55,25 +62,76 @@ const Page = () => {
     const styles = useMemo(() => createStyles(), []);
     const [pageHeight, setPageHeight] = useState(window.innerHeight);
     const [pageWidth, setPageWidth] = useState(0);
+    const [page, setPage] = useState(0);
+    const pageId = location.state.id;
+    const [totalItems, setTotalItems] = useState<number>(0);
+    const [onlyWithNote, setOnlyWithNote] = useState(false);
+    const [onlyFavorite, setOnlyFavorite] = useState(false);
+    const [dateTo, setDateTo] = useState(new Date());
+    const { authState } = useAuth();
 
-    useMountEffect(() => {
-        const loadClassifications = async (pageId: number) => {
-            //TODO pagination
-            const res = await classificationApi.get(pageId, 1);
+
+    //TODO probably rfc into just one endpoint with different params for filters
+    const loadClassifications = async (page: number) => {
+        if (pageId) {
+            const res = await classificationApi.get(pageId, page, toServerDateFormat(dateTo));
             if (res.ok && res.data) {
-                setClassifications(res.data)
+                // console.log(res.data.items);
+                setClassifications(res.data.items);
+                setTotalItems(res.data.totalItems);
+                //TODO asi neni potreba, kdyz klikam v pagination
+                //setPage(prev => prev++);
             }
         }
+    }
 
-        const pageId = location.state.id;
-        if (pageId) {
-            loadClassifications(pageId);
+    const loadClassificationsWithNote = async (page: number) => {
+        if (authState) {
+            const res = await classificationApi.getAllWithNote(authState.userId, page);
+            if (res.ok && res.data) {
+                // console.log(res.data.items);
+                setClassifications(res.data.items);
+                setTotalItems(res.data.totalItems);
+                //TODO asi neni potreba, kdyz klikam v pagination
+                //setPage(prev => prev++);
+            }
         }
+    }
+
+    const loadFavoriteClassifications = async (page: number) => {
+        if (authState) {
+            const res = await classificationApi.getAllFavorite(authState.userId, page);
+            if (res.ok && res.data) {
+                // console.log(res.data.items);
+                setClassifications(res.data.items);
+                setTotalItems(res.data.totalItems);
+                //TODO asi neni potreba, kdyz klikam v pagination
+                //setPage(prev => prev++);
+            }
+        }
+    }
+
+    useMountEffect(() => {
+        loadClassifications(page);
     })
 
     useEffect(() => {
         selectedClassification && setPolygons(selectedClassification.markings);
     }, [selectedClassification])
+
+
+    //TODO all filtering here
+    useEffect(() => {
+        setPage(0);
+        if (onlyWithNote) {
+            loadClassificationsWithNote(0);
+        } else if (onlyFavorite) {
+            loadFavoriteClassifications(0);
+        } else {
+            loadClassifications(0);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [onlyWithNote, onlyFavorite, dateTo])
 
 
     const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
@@ -133,8 +191,8 @@ const Page = () => {
                         <PageImage imgSource={`/images/${location.state.name}`} height={pageHeight} />
                         {polygons?.map(polygon => <Rect
                             //TODO FIX THIS THING
-                            x={polygon.x * 0.7}
-                            y={polygon.y * 0.7}
+                            x={polygon.x}
+                            y={polygon.y}
                             width={polygon.width}
                             height={polygon.height}
                             strokeWidth={1}
@@ -146,7 +204,48 @@ const Page = () => {
                 </Stage>
             </div>
             <div style={styles.accordionContainer}>
-                <ClassificationAccordion classifications={classifications} onClassificationSelect={setSelectedClassification} />
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                        label="Select date to"
+                        value={dateTo}
+                        onChange={(newValue) => {
+                            newValue && setDateTo(newValue);
+                            console.log(newValue)
+                        }}
+                        renderInput={(params) => <TextField {...params} />
+                        }
+                    />
+                </LocalizationProvider>
+                <IconButton
+                    color='primary'
+                    onClick={() => setDateTo(new Date())}
+                    component="span"
+                    //style={styles.addNoteIcon as React.CSSProperties}
+                >
+                    <CloseIcon />
+                </IconButton>
+                <div>With note only</div>
+                <Checkbox
+                    checked={onlyWithNote}
+                    onChange={() => {
+                        setOnlyFavorite(false);
+                        setOnlyWithNote(!onlyWithNote);
+                    }}
+
+                //inputProps={{ 'aria-label': 'controlled' }}
+                />
+                <div>Favorite</div>
+                <Checkbox
+                    checked={onlyFavorite}
+                    onChange={() => {
+                        setOnlyWithNote(false);
+                        setOnlyFavorite(!onlyFavorite);
+                    }}
+
+                //inputProps={{ 'aria-label': 'controlled' }}
+                />
+                <ClassificationAccordion classifications={classifications} onClassificationSelect={setSelectedClassification} totalItems={totalItems}
+                    page={page} onPaginationChange={(p) => loadClassifications(p)} />
             </div>
         </div>
     );

@@ -53,7 +53,8 @@ export interface IPage {
 }
 
 export interface IPageClassificationResponse {
-    pageClassifications: IPageClassification[];
+    items: IPageClassification[];
+    totalItems: number;
 }
 
 export interface IPageClassification {
@@ -68,7 +69,7 @@ export interface IPageClassification {
     userId: number;
     pageId: number;
 }
-
+ 
 
 export interface INote {
     classificationId: number;

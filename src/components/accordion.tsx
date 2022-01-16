@@ -6,7 +6,7 @@ import { useApi } from '../api/restApi';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
-import { Button, Divider, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Button, Divider, IconButton, InputAdornment, Pagination, TextField } from '@mui/material';
 import { useAuth } from '../context/auth';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from '@mui/icons-material/Star';
@@ -20,10 +20,13 @@ import { isEmptyObject } from '../utils';
 interface IClassificationAccordionProps {
     classifications: IPageClassification[];
     onClassificationSelect: (classification: IPageClassification | null) => void;
+    totalItems: number;
+    onPaginationChange: (newPage: number) => void;
+    page: number;
 }
 
 
-const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ classifications, onClassificationSelect }) => {
+const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ classifications, onClassificationSelect, totalItems, onPaginationChange, page }) => {
     const [expanded, setExpanded] = React.useState<number | false>();
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
@@ -36,7 +39,7 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
     const [currentClassifications, setCurrentClassifications] = useState<IPageClassification[]>(classifications);
 
 
-
+    console.log(classifications);
     const refresh = (updatedItem: IPageClassification) => {
         const updatedClassification = currentClassifications.map(obj => {
             if (obj.classificationId === updatedItem.classificationId)
@@ -158,9 +161,21 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
             }
         }
     }
+    const handlePageChange = (e, p) => {
+        setCurrentClassifications([]);
+        onPaginationChange(p);
+    };
+
 
     return (
         <div>
+            <Pagination
+                //TODO count the pages
+                count={totalItems}
+                size="large"
+                page={page}
+                onChange={handlePageChange}
+            />
             {currentClassifications.map(item => {
                 return (
                     <Accordion
@@ -172,7 +187,11 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
                         <AccordionSummary aria-controls={item.classificationId.toString()} id={item.classificationId.toString()}>
                             <Typography style={styles.fullWidth as React.CSSProperties}>
                                 <div style={styles.row}>
-                                    #{item.classificationId}
+                                    {/* TODO if exists, add username and make it clickable for selecting all of his work */}
+                                    <div>
+                                        #{item.classificationId}
+                                        {item.createdAt}
+                                    </div>
                                     <div style={styles.row}>
                                         {!isEmptyObject(item.note) &&
                                             <div onClick={(e) => addNote(e, item)}>

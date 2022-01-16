@@ -5,7 +5,18 @@ import applyCaseMiddleware from 'axios-case-converter';
 import { getKeyByValue } from '../utils';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/auth';
-import { IAddNotePost, IAddToFavoritesResponse, IApiResponse, IClassificationDetailResponse, IEditNotePost, ILoginData, ILoginResponse, INote, IPage, IPageClassification, IPageClassificationResponse, IPagesResponse } from '../types/general';
+import {
+    IAddNotePost,
+    IAddToFavoritesResponse,
+    IApiResponse,
+    IClassificationDetailResponse,
+    IEditNotePost,
+    ILoginData,
+    ILoginResponse,
+    INote,
+    IPage,
+    IPageClassificationResponse
+} from '../types/general';
 
 const baseURL = 'http://127.0.0.1:5000/';
 
@@ -103,7 +114,7 @@ export const useApi = () => {
     }
 
     const classificationApi = {
-        get: (pageId: number, page: number, dateTo?: string) => handleRequest<IPageClassification[]>(instance.get(`/page/${pageId}`, { params: { page, dateTo } })),
+        get: (pageId: number, page: number, dateTo?: string) => handleRequest<IPageClassificationResponse>(instance.get(`/page/${pageId}`, { params: { page, dateTo } })),
         getDetails: (classificationId: number) => handleRequest<IClassificationDetailResponse>(instance.get(`/classification/${classificationId}`)),
         visit: (userId: number, classificationId: number) =>
             handleRequest(instance.post(`/visit/${userId}`, { classificationId })),
@@ -112,16 +123,17 @@ export const useApi = () => {
             add: (userId: number, classificationId: number) =>
                 handleRequest<IAddToFavoritesResponse>(instance.post(`/favorite/${userId}`, { classificationId })),
             remove: (userId: number, favoriteId: number) =>
-                handleRequest(instance.delete(`/favorite/${userId}`, { params: { favoriteId }})),
+                handleRequest(instance.delete(`/favorite/${userId}`, { params: { favoriteId } })),
         },
-        getAllByUser: (userName: string, page: number) => handleRequest<IPageClassification[]>(instance.get(`/classification/user`, { params: { page, userName } })),
-        getAllWithNote: (userId: number, page: number) => handleRequest<IPageClassification[]>(instance.get(`/classification/note/${userId}`, { params: { page } })),
+        getAllByUser: (userName: string, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/user`, { params: { page, userName } })),
+        getAllWithNote: (userId: number, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/note/${userId}`, { params: { page } })),
+        getAllFavorite: (userId: number, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/favorite/${userId}`, { params: { page } })),
     }
 
     const notesApi = {
         addNote: (userId: number, data: IAddNotePost) => handleRequest<INote>(instance.post(`/note/${userId}`, data)),
         editNote: (userId: number, data: IEditNotePost) => handleRequest<INote>(instance.put(`/note/${userId}`, data)),
-        deleteNote: (userId: number, noteId: number) => handleRequest(instance.delete(`/note/${userId}`, { params: { noteId }})),
+        deleteNote: (userId: number, noteId: number) => handleRequest(instance.delete(`/note/${userId}`, { params: { noteId } })),
     }
 
     return { authApi, pagesApi, classificationApi, notesApi }
