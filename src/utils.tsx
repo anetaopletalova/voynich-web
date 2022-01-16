@@ -5,3 +5,10 @@ export const getKeyByValue = (object: StringStringObject, value: string): string
 
 export const isEmptyObject = obj => !obj || !Object.keys(obj).length;
 
+export const toServerDateFormat = date => {
+    const yyyy = ('000' + date.getFullYear()).slice(-4);
+    const mm = ('0' + (date.getMonth() + 1)).slice(-2);
+    const dd = ('0' + date.getDate()).slice(-2);
+
+    return `${yyyy}-${mm}-${dd}`;
+};
