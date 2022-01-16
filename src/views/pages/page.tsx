@@ -70,10 +70,10 @@ const Page = () => {
     const [dateTo, setDateTo] = useState(new Date());
     const { authState } = useAuth();
     const defaultParams = { pageId, page, dateTo: toServerDateFormat(dateTo) };
-
+    const [params, setParams] = useState<IClassificationParameters>(defaultParams);
 
     //TODO probably rfc into just one endpoint with different params for filters
-    const loadClassifications = async (page: number, params: IClassificationParameters = defaultParams) => {
+    const loadClassifications = async (params: IClassificationParameters = defaultParams) => {
         if (pageId && authState) {
             const res = await classificationApi.getByPageId(authState.userId, params);
             if (res.ok && res.data) {
@@ -86,35 +86,16 @@ const Page = () => {
         }
     }
 
-    const loadClassificationsWithNote = async (page: number) => {
-        if (authState) {
-            const res = await classificationApi.getByPageId(authState.userId, { pageId, page, dateTo: toServerDateFormat(dateTo), withNote: true });
-            if (res.ok && res.data) {
-                // console.log(res.data.items);
-                setClassifications(res.data.items);
-                setTotalItems(res.data.totalItems);
-                //TODO asi neni potreba, kdyz klikam v pagination
-                //setPage(prev => prev++);
-            }
-        }
-    }
-
-    const loadFavoriteClassifications = async (page: number) => {
-        if (authState) {
-            const res = await classificationApi.getByPageId(authState.userId, { pageId, page, dateTo: toServerDateFormat(dateTo), favorite: true });
-            if (res.ok && res.data) {
-                // console.log(res.data.items);
-                setClassifications(res.data.items);
-                setTotalItems(res.data.totalItems);
-                //TODO asi neni potreba, kdyz klikam v pagination
-                //setPage(prev => prev++);
-            }
-        }
-    }
-
     useMountEffect(() => {
-        loadClassifications(page);
+        loadClassifications();
     })
+
+    useEffect(() => {
+        //TODO check if it updates correctly
+        const newParams = { ...params, page};
+        loadClassifications(newParams);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page, params])
 
     useEffect(() => {
         selectedClassification && setPolygons(selectedClassification.markings);
@@ -130,7 +111,8 @@ const Page = () => {
         } else if (onlyFavorite) {
             params = { pageId, page, dateTo: toServerDateFormat(dateTo), favorite: true };
         } 
-        loadClassifications(0, params);
+        setParams(params);
+        // loadClassifications(params);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [onlyWithNote, onlyFavorite, dateTo])
 
@@ -246,7 +228,7 @@ const Page = () => {
                 //inputProps={{ 'aria-label': 'controlled' }}
                 />
                 <ClassificationAccordion classifications={classifications} onClassificationSelect={setSelectedClassification} totalItems={totalItems}
-                    page={page} onPaginationChange={(p) => loadClassifications(p)} />
+                    page={page} onPaginationChange={(p) => setPage(p)} />
             </div>
         </div>
     );
