@@ -36,6 +36,7 @@ const MyList = () => {
         loadClassifications();
     })
 
+    //TODO tady ais budu chtit pouzit PageClassificationView
     return (
         <div>Stats</div>
     );

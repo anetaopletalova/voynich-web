@@ -1,13 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Theme, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { IPageClassification } from '../types/general';
-import { useApi } from '../api/restApi';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
-import { Divider, Pagination } from '@mui/material';
-import { useAuth } from '../context/auth';
+import { Divider } from '@mui/material';
 import StickyNote2Icon from '@mui/icons-material/StickyNote2';
 import { isEmptyObject } from '../utils';
 import FavoriteStar from '../views/classifications/favorite';
@@ -16,68 +14,30 @@ import NoteView from '../views/classifications/note';
 interface IClassificationAccordionProps {
     classifications: IPageClassification[];
     onClassificationSelect: (classification: IPageClassification | null) => void;
-    totalItems: number;
-    onPaginationChange: (newPage: number) => void;
-    page: number;
+    onItemSelect: (selected: IPageClassification) => void;
+    refresh: (updated: IPageClassification) => void;
 }
 
 
-const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ classifications, onClassificationSelect, totalItems, onPaginationChange, page }) => {
+const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ classifications, onClassificationSelect, onItemSelect, refresh }) => {
     const [expanded, setExpanded] = React.useState<number | false>();
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
-    const { classificationApi } = useApi();
-    const { authState } = useAuth();
-    //try use memo
-    const [currentClassifications, setCurrentClassifications] = useState<IPageClassification[]>(classifications);
 
 
     console.log(classifications);
-    const refresh = (updatedItem: IPageClassification) => {
-        const updatedClassification = currentClassifications.map(obj => {
-            if (obj.classificationId === updatedItem.classificationId)
-                return updatedItem;
-            return obj;
-        });
-        setCurrentClassifications(updatedClassification);
-    }
 
     const handleChange =
-        (selected: IPageClassification) => async (event: React.SyntheticEvent, newExpanded: boolean) => {
+        (selected: IPageClassification) => (event: React.SyntheticEvent, newExpanded: boolean) => {
             setExpanded(newExpanded ? selected.classificationId : false);
+            //TODO Do i need both these methods?? probably only one combined
             onClassificationSelect(newExpanded ? selected : null);
-            if (!selected.visited && authState) {
-                const res = await classificationApi.visit(authState.userId, selected.classificationId);
-                console.log(res);
-                if (res) {
-                    const updated = {
-                        ...selected,
-                        visited: true,
-                    };
-                    refresh(updated);
-                }
-            }
+            onItemSelect(selected);
         };
-
-    useEffect(() => {
-        setCurrentClassifications(classifications);
-    }, [classifications])
-
-    const handlePageChange = (e, p) => {
-        setCurrentClassifications([]);
-        onPaginationChange(p);
-    };
 
     return (
         <div>
-            <Pagination
-                //TODO count the pages
-                count={totalItems}
-                size="large"
-                page={page}
-                onChange={handlePageChange}
-            />
-            {currentClassifications.map(item => {
+            {classifications.map(item => {
                 return (
                     <Accordion
                         style={item.visited ? styles.visited : undefined}
@@ -129,14 +89,6 @@ const createStyles = (theme: Theme) => (
             display: 'flex',
             justifyContent: 'space-between'
         },
-        addNoteIcon: {
-            padding: 0,
-            width: 'auto',
-            float: 'right',
-        },
-        flex: {
-            width: '90%',
-        }
     }
 );
 

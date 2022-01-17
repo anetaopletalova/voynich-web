@@ -2,7 +2,6 @@ import { useTheme } from '@emotion/react';
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApi } from '../../api/restApi';
-import ClassificationAccordion from '../../components/accordion';
 import { useMountEffect } from '../../helpers/hooks';
 import { IClassificationParameters, IMarking, IPage, IPageClassification } from '../../types/general';
 import { useAuth } from '../../context/auth';
@@ -17,8 +16,6 @@ const Page = () => {
     const { classificationApi } = useApi();
     const [classifications, setClassifications] = useState<IPageClassification[]>([]);
     const [selectedClassification, setSelectedClassification] = useState<IPageClassification | null>(null);
-    // const [drawCtx, setDrawCtx] = useState<CanvasRenderingContext2D | null>(null);
-    // const [imgWidth, setImgWidth] = useState<number>();
     const [imgHeight, setImgHeight] = useState<number>();
     const theme = useTheme();
     const styles = useMemo(() => createStyles(), []);
@@ -35,16 +32,12 @@ const Page = () => {
     const defaultParams = { pageId, page, dateTo: toServerDateFormat(dateTo) };
     const [params, setParams] = useState<IClassificationParameters>(defaultParams);
 
-
     const loadClassifications = async (params: IClassificationParameters = defaultParams) => {
         if (pageId && authState) {
             const res = await classificationApi.getByPageId(authState.userId, params);
             if (res.ok && res.data) {
-                // console.log(res.data.items);
                 setClassifications(res.data.items);
                 setTotalItems(res.data.totalItems);
-                //TODO asi neni potreba, kdyz klikam v pagination
-                //setPage(prev => prev++);
             }
         }
     }
@@ -65,7 +58,6 @@ const Page = () => {
     }, [selectedClassification])
 
 
-    //TODO all filtering here
     useEffect(() => {
         setPage(0);
         let params: IClassificationParameters = defaultParams;
@@ -105,7 +97,7 @@ const Page = () => {
                     dateTo={dateTo}
                     setDateTo={setDateTo}
                 />
-                <ClassificationAccordion classifications={classifications} onClassificationSelect={setSelectedClassification} totalItems={totalItems}
+                <PageClassificationView classifications={classifications} onClassificationSelect={setSelectedClassification} totalItems={totalItems}
                     page={page} onPaginationChange={(p) => setPage(p)} />
             </div>
         </div>
