@@ -5,63 +5,26 @@ import { useApi } from '../../api/restApi';
 import ClassificationAccordion from '../../components/accordion';
 import { useMountEffect } from '../../helpers/hooks';
 import { IClassificationParameters, IMarking, IPage, IPageClassification } from '../../types/general';
-import { Stage, Layer, Rect, Image } from 'react-konva';
-import { KonvaEventObject } from 'konva/lib/Node';
-import { Checkbox, IconButton, TextField } from '@mui/material';
 import { useAuth } from '../../context/auth';
-import DatePicker from '@mui/lab/DatePicker';
-import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import { toServerDateFormat } from '../../utils';
-import CloseIcon from '@mui/icons-material/Close';
-
-
-interface IPageImageProps {
-    imgSource: string,
-    height: number,
-}
-
-const PageImage: React.FC<IPageImageProps> = ({ imgSource, height }) => {
-    const [img, setImg] = useState<any>();
-    const [newWidth, setNewWidth] = useState<number>();
-
-    useMountEffect(() => {
-        const image = new window.Image();
-        image.src = imgSource;
-        image.onload = () => {
-            setImg(image);
-
-        };
-    });
-
-    useEffect(() => {
-        if (img) {
-            const ratio = img.height / img.width;
-            console.log(img.height);
-            const scaledWidth = height / ratio;
-            setNewWidth(scaledWidth);
-        }
-    }, [img, height])
-
-    return (img ? <Image image={img} height={height} width={newWidth} /> : null);
-}
+import Controls from './controls';
+import Canvas from './canvas';
+import PageClassificationView from '../classifications/pageClassification';
 
 
 const Page = () => {
     const location = useLocation<IPage>();
-    // const canvasRef = useRef<HTMLCanvasElement>(null);
-    // const imageRef = useRef<HTMLCanvasElement>(null);
     const { classificationApi } = useApi();
     const [classifications, setClassifications] = useState<IPageClassification[]>([]);
     const [selectedClassification, setSelectedClassification] = useState<IPageClassification | null>(null);
     // const [drawCtx, setDrawCtx] = useState<CanvasRenderingContext2D | null>(null);
     // const [imgWidth, setImgWidth] = useState<number>();
     const [imgHeight, setImgHeight] = useState<number>();
-    const [polygons, setPolygons] = useState<IMarking[]>();
     const theme = useTheme();
     const styles = useMemo(() => createStyles(), []);
     const [pageHeight, setPageHeight] = useState(window.innerHeight);
     const [pageWidth, setPageWidth] = useState(0);
+    const [polygons, setPolygons] = useState<IMarking[]>()
     const [page, setPage] = useState(0);
     const pageId = location.state.id;
     const [totalItems, setTotalItems] = useState<number>(0);
@@ -72,7 +35,7 @@ const Page = () => {
     const defaultParams = { pageId, page, dateTo: toServerDateFormat(dateTo) };
     const [params, setParams] = useState<IClassificationParameters>(defaultParams);
 
-    //TODO probably rfc into just one endpoint with different params for filters
+
     const loadClassifications = async (params: IClassificationParameters = defaultParams) => {
         if (pageId && authState) {
             const res = await classificationApi.getByPageId(authState.userId, params);
@@ -92,7 +55,7 @@ const Page = () => {
 
     useEffect(() => {
         //TODO check if it updates correctly
-        const newParams = { ...params, page};
+        const newParams = { ...params, page };
         loadClassifications(newParams);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, params])
@@ -110,49 +73,11 @@ const Page = () => {
             params = { pageId, page, dateTo: toServerDateFormat(dateTo), withNote: true };
         } else if (onlyFavorite) {
             params = { pageId, page, dateTo: toServerDateFormat(dateTo), favorite: true };
-        } 
+        }
         setParams(params);
         // loadClassifications(params);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [onlyWithNote, onlyFavorite, dateTo])
-
-
-    const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
-        e.evt.preventDefault();
-        var scaleBy = 1.02;
-        //current target je scale, target je rect
-        var oldScale = e.currentTarget.scaleX();
-        var pointer = e.currentTarget.getRelativePointerPosition();
-        if (pointer) {
-            var mousePointTo = {
-                x: (pointer.x - e.currentTarget.x()) / oldScale,
-                y: (pointer.y - e.currentTarget.y()) / oldScale,
-            };
-            //pointer je pozice mysi v obrazku
-            console.log(pointer)
-            console.log(mousePointTo);
-            // how to scale? Zoom in? Or zoom out?
-            let direction = e.evt.deltaY > 0 ? -1 : 1;
-            //console.log('dir', direction)
-
-            // when we zoom on trackpad, e.evt.ctrlKey is true
-            // in that case lets revert direction
-            if (e.evt.ctrlKey) {
-                direction = -direction;
-            }
-
-            var newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-
-            e.currentTarget.scale({ x: newScale, y: newScale });
-
-            var newPos = {
-                x: pointer.x - mousePointTo.x * newScale,
-                y: pointer.y - mousePointTo.y * newScale,
-            };
-
-            e.currentTarget.position(newPos);
-        }
-    };
 
     useLayoutEffect(() => {
         const updateSize = () => {
@@ -169,63 +94,16 @@ const Page = () => {
     return (
         <div style={styles.content as React.CSSProperties}>
             <div id='page' style={styles.pageContent}>
-                <Stage width={pageWidth} height={pageHeight} onWheel={handleWheel} draggable={true} >
-                    <Layer>
-                        <PageImage imgSource={`/images/${location.state.name}`} height={pageHeight} />
-                        {polygons?.map(polygon => <Rect
-                            //TODO FIX THIS THING
-                            x={polygon.x}
-                            y={polygon.y}
-                            width={polygon.width}
-                            height={polygon.height}
-                            strokeWidth={1}
-                            stroke="red"
-                            shadowBlur={5}
-                            onClick={() => console.log('ee')}
-                        />)}
-                    </Layer>
-                </Stage>
+                <Canvas pageHeight={pageHeight} pageWidth={pageWidth} polygons={polygons} />
             </div>
             <div style={styles.accordionContainer}>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <DatePicker
-                        label="Select date to"
-                        value={dateTo}
-                        onChange={(newValue) => {
-                            newValue && setDateTo(newValue);
-                            console.log(newValue)
-                        }}
-                        renderInput={(params) => <TextField {...params} />
-                        }
-                    />
-                </LocalizationProvider>
-                <IconButton
-                    color='primary'
-                    onClick={() => setDateTo(new Date())}
-                    component="span"
-                //style={styles.addNoteIcon as React.CSSProperties}
-                >
-                    <CloseIcon />
-                </IconButton>
-                <div>With note only</div>
-                <Checkbox
-                    checked={onlyWithNote}
-                    onChange={() => {
-                        setOnlyFavorite(false);
-                        setOnlyWithNote(!onlyWithNote);
-                    }}
-
-                //inputProps={{ 'aria-label': 'controlled' }}
-                />
-                <div>Favorite</div>
-                <Checkbox
-                    checked={onlyFavorite}
-                    onChange={() => {
-                        setOnlyWithNote(false);
-                        setOnlyFavorite(!onlyFavorite);
-                    }}
-
-                //inputProps={{ 'aria-label': 'controlled' }}
+                <Controls
+                    onlyWithNote={onlyWithNote}
+                    setOnlyWithNote={setOnlyWithNote}
+                    onlyFavorite={onlyFavorite}
+                    setOnlyFavorite={setOnlyFavorite}
+                    dateTo={dateTo}
+                    setDateTo={setDateTo}
                 />
                 <ClassificationAccordion classifications={classifications} onClassificationSelect={setSelectedClassification} totalItems={totalItems}
                     page={page} onPaginationChange={(p) => setPage(p)} />

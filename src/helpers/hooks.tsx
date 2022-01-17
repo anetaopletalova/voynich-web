@@ -7,3 +7,9 @@ import { useEffect } from "react";
 
 // eslint-disable-next-line react-hooks/exhaustive-deps
 export const useMountEffect = func => useEffect(func, []);
+
+export const useUnmountEffect = func => {
+    const unmount = () => func;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(unmount, []);
+};

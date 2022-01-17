@@ -9,7 +9,6 @@ import {
     IAddNotePost,
     IAddToFavoritesResponse,
     IApiResponse,
-    IClassificationDetailResponse,
     IClassificationParameters,
     IEditNotePost,
     ILoginData,
