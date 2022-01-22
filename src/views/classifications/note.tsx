@@ -3,7 +3,7 @@ import { IPageClassification } from '../../types/general';
 import { useAuth } from '../../context/auth';
 import { useApi } from '../../api/restApi';
 import { isEmptyObject } from '../../utils';
-import { Button, Divider, IconButton, InputAdornment, TextField, Theme, useTheme } from '@mui/material';
+import { Button, IconButton, InputAdornment, TextField, Theme, useTheme } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import CloseIcon from '@mui/icons-material/Close';

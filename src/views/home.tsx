@@ -1,8 +1,9 @@
 import { Badge, Theme, useTheme } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useApi } from '../api/restApi';
 import SearchInput from '../components/search';
+import { useMountEffect } from '../helpers/hooks';
 import { IPage } from '../types/general';
 
 interface IPageContainerProps {
@@ -16,7 +17,7 @@ const Home = () => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
 
-    useEffect(() => {
+    useMountEffect(() => {
         const loadPages = async () => {
             const res = await pagesApi.getAll();
             if (res.ok && res.data) {
@@ -26,7 +27,7 @@ const Home = () => {
         };
 
         loadPages();
-    }, [])
+    })
 
     const searchByText = (filterText: string) => {
         if (filterText === '') setFilteredPages(pages);
@@ -90,7 +91,8 @@ const createStyles = (theme: Theme) => (
         searchContainer: {
             justifyContent: 'flex-end',
             display: 'flex',
-            marginTop: '10px'
+            marginTop: '10px',
+            marginRight: '15px',
         },
     }
 );

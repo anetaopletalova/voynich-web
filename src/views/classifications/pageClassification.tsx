@@ -59,7 +59,7 @@ const PageClassificationView: React.FC<IPageClassificationViewProps> = ({ classi
     return (
         <>
             <Pagination
-                //TODO count the pages
+                //TODO count the pages 
                 count={totalItems}
                 size="large"
                 page={page}
