@@ -1,17 +1,20 @@
 import { Stage, Layer, Rect } from 'react-konva';
 import { KonvaEventObject } from 'konva/lib/Node';
 import PageImage from './pageImage';
-import { IMarking, IPage } from '../../types/general';
-import { useLocation } from 'react-router-dom';
+import { IMarking } from '../../types/general';
+import { useState } from 'react';
 
 interface ICanvasProps {
     pageWidth: number;
     pageHeight: number;
     polygons: IMarking[] | undefined;
+    pageName: string;
 }
 
-const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons }) => {
-    const location = useLocation<IPage>();
+const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageName }) => {
+    const [originalHeight, setOriginalHeight] = useState(1);
+    const [originalWidth, setOriginalWidth] = useState(1);
+    const [newWidth, setNewWidth] = useState(1);
 
     const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
         e.evt.preventDefault();
@@ -51,19 +54,30 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons }) => 
     };
 
     return (
-        <Stage width={pageWidth} height={pageHeight} onWheel={handleWheel} draggable={true} >
+        <Stage
+            width={pageWidth}
+            height={pageHeight}
+            onWheel={handleWheel}
+            draggable={true}
+        >
             <Layer>
-                <PageImage imgSource={`/images/${location.state.name}`} height={pageHeight} />
+                <PageImage
+                    imgSource={`/images/${pageName}`}
+                    height={pageHeight}
+                    setOriginalHeight={setOriginalHeight}
+                    setOriginalWidth={setOriginalWidth}
+                    setNewWidth={setNewWidth}
+                />
                 {polygons?.map(polygon => <Rect
-                    //TODO FIX THIS THING
-                    x={polygon.x}
-                    y={polygon.y}
-                    width={polygon.width}
-                    height={polygon.height}
+                    x={(newWidth / originalWidth) * polygon.x}
+                    y={(pageHeight / originalHeight) * polygon.y}
+                    width={(newWidth / originalWidth) *polygon.width}
+                    height={(pageHeight / originalHeight) * polygon.height}
                     strokeWidth={1}
                     stroke="red"
                     shadowBlur={5}
                     onClick={() => console.log('ee')}
+                    
                 />)}
             </Layer>
         </Stage>)
