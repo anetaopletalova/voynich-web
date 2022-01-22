@@ -60,15 +60,9 @@ const Page = () => {
 
     useEffect(() => {
         setPage(0);
-        let params: IClassificationParameters = defaultParams;
-        if (onlyWithNote) {
-            params = { pageId, page, dateTo: toServerDateFormat(dateTo), withNote: true };
-        } else if (onlyFavorite) {
-            params = { pageId, page, dateTo: toServerDateFormat(dateTo), favorite: true };
-        }
+        const params: IClassificationParameters = { pageId, page, dateTo: toServerDateFormat(dateTo), withNote: onlyWithNote, favorite: onlyFavorite };
         setParams(params);
-        // loadClassifications(params);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [onlyWithNote, onlyFavorite, dateTo])
 
     useLayoutEffect(() => {
@@ -86,7 +80,7 @@ const Page = () => {
     return (
         <div style={styles.content as React.CSSProperties}>
             <div id='page' style={styles.pageContent}>
-                <Canvas pageHeight={pageHeight} pageWidth={pageWidth} polygons={polygons} />
+                <Canvas pageName={location.state.name} pageHeight={pageHeight} pageWidth={pageWidth} polygons={polygons} />
             </div>
             <div style={styles.accordionContainer}>
                 <Controls

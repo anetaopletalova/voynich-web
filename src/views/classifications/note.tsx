@@ -3,7 +3,7 @@ import { IPageClassification } from '../../types/general';
 import { useAuth } from '../../context/auth';
 import { useApi } from '../../api/restApi';
 import { isEmptyObject } from '../../utils';
-import { Button, IconButton, InputAdornment, TextField, Theme, useTheme } from '@mui/material';
+import { Button, Divider, IconButton, InputAdornment, TextField, Theme, useTheme } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import CloseIcon from '@mui/icons-material/Close';
@@ -31,6 +31,12 @@ const NoteView: React.FC<INoteViewProps> = ({ item, onNoteUpdate }) => {
 
     const saveNote = async (item: IPageClassification) => {
         if (!authState) return;
+
+        console.log(item?.note);
+        if (item?.note?.text === '') {
+            deleteNote(item);
+            return;
+        }
 
         if (isEditMode && item.note) {
             const payload = {
@@ -66,7 +72,7 @@ const NoteView: React.FC<INoteViewProps> = ({ item, onNoteUpdate }) => {
         setOpenNote(false);
     }
 
-    
+
     const editNote = async (item: IPageClassification) => {
         setOpenNote(true);
         setIsEditMode(true);
@@ -93,44 +99,49 @@ const NoteView: React.FC<INoteViewProps> = ({ item, onNoteUpdate }) => {
         }
     }
 
-    return (<>
-        {!isEmptyObject(item.note) && !openNote && <div>
-            {item.note?.text}
+    return (<div>
+        {!isEmptyObject(item.note) && !openNote &&
+            <div style={styles.note}>
+                <div>Note</div>
+                <div style={styles.noteText}>
+                    {item.note?.text}
+                </div>
+                <div>
+                    <IconButton
+                        color='primary'
+                        onClick={() => editNote(item)}
+                        component="span"
+                        style={styles.addNoteIcon}
+                    >
+                        <EditIcon />
+                    </IconButton>
+                    <IconButton
+                        color='primary'
+                        onClick={() => deleteNote(item)}
+                        component="span"
+                        style={styles.addNoteIcon}
+                    >
+                        <DeleteForeverIcon />
+                    </IconButton>
+                </div>
+            </div>
+        }
+        {isEmptyObject(item.note) && !openNote && (
             <IconButton
-                color='primary'
-                onClick={() => editNote(item)}
-                component="span"
-                style={styles.addNoteIcon as React.CSSProperties}
-            >
-                <EditIcon />
-            </IconButton>
-            <IconButton
-                color='primary'
-                onClick={() => deleteNote(item)}
-                component="span"
-                style={styles.addNoteIcon as React.CSSProperties}
-            >
-                <DeleteForeverIcon />
-            </IconButton>
-        </div>}
-        {isEmptyObject(item.note) && !openNote &&
-            (<IconButton
                 color='secondary'
                 onClick={() => setOpenNote(true)}
                 component="span"
-                style={styles.addNoteIcon as React.CSSProperties}
+                style={styles.addNoteIcon}
             >
                 <NoteAddIcon />
             </IconButton>
-            )}
+        )}
         {openNote &&
-            <div style={styles.fullWidth as React.CSSProperties}>
+            <div style={styles.fullWidth}>
                 <TextField
-                    //id="standard-multiline-static"
-                    //label="Multiline"
-                    style={styles.flex as React.CSSProperties}
+                    style={styles.flex}
                     multiline
-                    maxRows={4}
+                    maxRows={5}
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     InputProps={{
@@ -140,7 +151,7 @@ const NoteView: React.FC<INoteViewProps> = ({ item, onNoteUpdate }) => {
                                     color='primary'
                                     onClick={() => { setNote('') }}
                                     component="span"
-                                    style={styles.addNoteIcon as React.CSSProperties}
+                                    style={styles.addNoteIcon}
                                 >
                                     <CloseIcon />
                                 </IconButton>
@@ -149,27 +160,36 @@ const NoteView: React.FC<INoteViewProps> = ({ item, onNoteUpdate }) => {
                     }}
                 />
                 <Button
+                    disabled={!note}
                     onClick={() => saveNote(item)}>Save note</Button>
             </div>
         }
-    </>)
-
+    </div>
+    )
 }
 
-const createStyles = (theme: Theme) => (
+const createStyles = (theme: Theme): { [key: string]: React.CSSProperties } => (
     {
         fullWidth: {
             width: '100%',
             textAlign: 'left',
-            paddingBottom: '5px'
+            paddingBottom: '5px',
+            marginLeft: '10px',
         },
         addNoteIcon: {
-            padding: 0,
             width: 'auto',
-            float: 'right',
         },
         flex: {
             width: '90%',
+        },
+        note: {
+            backgroundColor: 'lightgray',
+            borderRadius: '5px',
+            marginLeft: '10px',
+            padding: '5px',
+        },
+        noteText: {
+            width: '100%',
         }
     }
 );

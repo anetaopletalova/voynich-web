@@ -12,7 +12,7 @@ import { Toaster } from 'react-hot-toast';
 import './index.scss';
 import Home from './views/home';
 import Page from './views/pages/page';
-import MyList from './stats';
+import MyList from './myList';
 
 const RootProviders = ({ children }) => (
   <Router>

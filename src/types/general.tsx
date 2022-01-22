@@ -68,6 +68,7 @@ export interface IPageClassification {
     userName: string;
     userId: number;
     pageId: number;
+    pageName: string;
 }
 
 export interface INote {

@@ -12,3 +12,17 @@ export const toServerDateFormat = date => {
 
     return `${yyyy}-${mm}-${dd}`;
 };
+
+export const formatDate = dateStr => {
+    const date = new Date(dateStr);
+    const day = new Intl.DateTimeFormat('en-US', {
+        day: 'numeric',
+    }).format(date);
+    const month = new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+    }).format(date);
+    const year = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+    }).format(date);
+    return `${day} ${month} ${year}`;
+};

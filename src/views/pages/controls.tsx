@@ -2,8 +2,10 @@ import { Checkbox, IconButton, TextField, Theme, useTheme } from '@mui/material'
 import DatePicker from '@mui/lab/DatePicker';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import CloseIcon from '@mui/icons-material/Close';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { useMemo } from 'react';
+import StarIcon from '@mui/icons-material/Star';
+import StickyNote2Icon from '@mui/icons-material/StickyNote2';
 
 interface IControlProps {
     onlyWithNote: boolean;
@@ -19,43 +21,48 @@ const Controls: React.FC<IControlProps> = ({ onlyWithNote, setOnlyWithNote, only
     const styles = useMemo(() => createStyles(theme), [theme]);
 
     return (
-        <>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                    label="Select date to"
-                    value={dateTo}
-                    onChange={(newValue) => {
-                        newValue && setDateTo(newValue);
-                        console.log(newValue)
-                    }}
-                    renderInput={(params) => <TextField {...params} />
-                    }
-                />
-            </LocalizationProvider>
-            <IconButton
-                color='primary'
-                onClick={() => setDateTo(new Date())}
-                component="span"
-            >
-                <CloseIcon />
-            </IconButton>
-            <div>With note only</div>
-            <Checkbox
-                checked={onlyWithNote}
-                onChange={() => {
-                    setOnlyFavorite(false);
-                    setOnlyWithNote(!onlyWithNote);
-                }}
-            />
-            <div>Favorite</div>
-            <Checkbox
-                checked={onlyFavorite}
-                onChange={() => {
-                    setOnlyWithNote(false);
-                    setOnlyFavorite(!onlyFavorite);
-                }}
-            />
-        </>
+        <div style={styles.controls as React.CSSProperties}>
+            <div style={styles.row as React.CSSProperties}>
+                <div style={styles.controlItem as React.CSSProperties}>
+                    <Checkbox
+                        checked={onlyWithNote}
+                        onChange={() => {
+                            setOnlyWithNote(!onlyWithNote);
+                        }}
+                    />
+                    <StickyNote2Icon  color='secondary'/>
+                </div>
+                <div style={styles.controlItem as React.CSSProperties}>
+                    <Checkbox
+                        checked={onlyFavorite}
+                        onChange={() => {
+                            setOnlyFavorite(!onlyFavorite);
+                        }}
+                    />
+                    <StarIcon color='secondary' />
+                </div>
+            </div>
+            <div style={styles.controls as React.CSSProperties}>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                        label="Select date to"
+                        value={dateTo}
+                        onChange={(newValue) => {
+                            newValue && setDateTo(newValue);
+                        }}
+                        renderInput={(params) => <TextField {...params} />
+                        }
+                    />
+                </LocalizationProvider>
+                <IconButton
+                    color='secondary'
+                    onClick={() => setDateTo(new Date())}
+                    component="span"
+                >
+                    <RestartAltIcon />
+                </IconButton>
+            </div>
+        </div>
     );
 }
 
@@ -73,7 +80,19 @@ const createStyles = (theme: Theme) => (
         },
         flex: {
             width: '90%',
-        }
+        },
+        controls: {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+        },
+        controlItem: {
+            alignItems: 'center',
+            display: 'flex',
+            flexDirection: 'row',
+        },
+        row: { display: 'flex', alignItems: 'center', }
     }
 );
 

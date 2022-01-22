@@ -40,11 +40,13 @@ const FavoriteStar: React.FC<IFavoriteStarProps> = ({item, onStarToggle}) => {
         }
     }
 
-    return (<div onClick={(e) => addToFavorites(e, item)}>
-        {item.favorite ?
-            <StarIcon color='primary' /> : <StarBorderIcon />}
-    </div>)
-
+    return (
+        <div onClick={(e) => addToFavorites(e, item)}>
+            {item.favorite ?
+                <StarIcon color='primary' /> : <StarBorderIcon />
+            }
+        </div>
+    )
 }
 
 export default FavoriteStar;

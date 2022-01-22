@@ -15,6 +15,8 @@ interface IPageClassificationViewProps {
     page: number;
 }
 
+
+
 const PageClassificationView: React.FC<IPageClassificationViewProps> = ({ classifications, onClassificationSelect, totalItems, onPaginationChange, page }) => {
    const { classificationApi } = useApi();
     const { authState } = useAuth();
@@ -22,7 +24,7 @@ const PageClassificationView: React.FC<IPageClassificationViewProps> = ({ classi
     const [currentClassifications, setCurrentClassifications] = useState<IPageClassification[]>(classifications);
    
 
-    console.log(classifications);
+    //console.log(classifications);
     const refresh = (updatedItem: IPageClassification) => {
         const updatedClassification = currentClassifications.map(obj => {
             if (obj.classificationId === updatedItem.classificationId)
@@ -33,10 +35,8 @@ const PageClassificationView: React.FC<IPageClassificationViewProps> = ({ classi
     }
 
     const handleSelectItem = async (selected: IPageClassification) => {
-        console.log('***', selected);
         if (!selected.visited && authState) {
             const res = await classificationApi.visit(authState.userId, selected.classificationId);
-            console.log(res);
             if (res) {
                 const updated = {
                     ...selected,
