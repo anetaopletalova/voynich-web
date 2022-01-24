@@ -8,9 +8,10 @@ interface ISearchInputProps {
     label?: string;
     placeholder?: string;
     hasClearButton?: boolean;
+    defaultValue?: string;
 }
 
-const SearchInput: React.FC<ISearchInputProps> = ({ onSearch, label, placeholder, hasClearButton = false, onTextChange = false }) => {
+const SearchInput: React.FC<ISearchInputProps> = ({ onSearch, label, placeholder, defaultValue, hasClearButton = false, onTextChange = false }) => {
     const [searchedText, setSearchedValue] = useState('');
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
@@ -31,7 +32,7 @@ const SearchInput: React.FC<ISearchInputProps> = ({ onSearch, label, placeholder
                 id="outlined-basic"
                 variant="outlined"
                 placeholder={placeholder || ''}
-                value={searchedText}
+                value={defaultValue || searchedText}
                 label={label || 'Search'}
                 onChange={(e) => search(e.target.value)}
                 style={styles.search}

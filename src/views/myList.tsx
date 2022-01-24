@@ -1,15 +1,15 @@
 import { useTheme } from '@emotion/react';
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useApi } from './api/restApi';
-import SearchInput from './components/search';
-import { useAuth } from './context/auth';
-import { useMountEffect } from './helpers/hooks';
-import { IClassificationParameters, IMarking, IPageClassification } from './types/general';
-import { toServerDateFormat } from './utils';
-import PageClassificationView from './views/classifications/pageClassification';
-import Canvas from './views/pages/canvas';
-import Controls from './views/pages/controls';
+import { useApi } from '../api/restApi';
+import SearchInput from '../components/search';
+import { useAuth } from '../context/auth';
+import { useMountEffect } from '../helpers/hooks';
+import { IClassificationParameters, IMarking, IPageClassification } from '../types/general';
+import { toServerDateFormat } from '../utils';
+import PageClassificationView from './classifications/pageClassification';
+import Canvas from './pages/canvas';
+import Controls from './pages/controls';
 
 const MyList = () => {
     const { classificationApi } = useApi();
@@ -76,7 +76,6 @@ const MyList = () => {
 
     useLayoutEffect(() => {
         const updateSize = () => {
-            console.log(document.querySelector('#page')?.clientWidth);
             setPageWidth(document.querySelector('#page')?.clientWidth || 0);
             setPageHeight(window.innerHeight - 64);
         }
@@ -89,7 +88,6 @@ const MyList = () => {
         console.log('ss');
         setUserName(filterText);
         setSelectedClassification(null);
-        //TODO napsat nekde, ze se vyhledava pro tohoto uzivatele, misto searchinputu a dat tam moznost to zrusit X
     };
 
     return (
@@ -98,8 +96,7 @@ const MyList = () => {
                 {pageName && <Canvas pageName={pageName} pageHeight={pageHeight} pageWidth={pageWidth} polygons={polygons} />}
             </div>
             <div style={styles.accordionContainer}>
-                <div>{userName}</div>
-                <SearchInput onSearch={searchByText} hasClearButton={true}/>
+                <SearchInput onSearch={searchByText} hasClearButton={true} defaultValue={userName}/>
                 <Controls
                     onlyWithNote={onlyWithNote}
                     setOnlyWithNote={setOnlyWithNote}
