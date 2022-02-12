@@ -1,4 +1,4 @@
-import { Stage, Layer, Rect } from 'react-konva';
+import { Stage, Layer, Rect, Label, Tag, Text } from 'react-konva';
 import { KonvaEventObject } from 'konva/lib/Node';
 import PageImage from './pageImage';
 import { IMarking } from '../../types/general';
@@ -11,10 +11,17 @@ interface ICanvasProps {
     pageName: string;
 }
 
+interface ITooltip {
+    x: number;
+    y: number;
+    idx: number;
+}
+
 const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageName }) => {
     const [originalHeight, setOriginalHeight] = useState(1);
     const [originalWidth, setOriginalWidth] = useState(1);
     const [newWidth, setNewWidth] = useState(1);
+    const [selectedTooltip, setSelectedTooltip] = useState<ITooltip | null>(null);
 
     const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
         e.evt.preventDefault();
@@ -53,8 +60,38 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
         }
     };
 
+    const showTooltip = () => {
+        if (selectedTooltip === null || !polygons) return null;
+
+        return (
+            <Label x={selectedTooltip.x} y={selectedTooltip.y} opacity={0.75}>
+                <Tag
+                    fill={"black"}
+                    pointerWidth={10}
+                    pointerHeight={10}
+                    lineJoin={"round"}
+                    shadowColor={"black"}
+                    shadowBlur={10}
+                    shadowOffsetX={10}
+                    shadowOffsetY={10}
+                    shadowOpacity={0.2}
+                />
+                <Text text={polygons[selectedTooltip.idx].description} fill={"white"} fontSize={18} padding={5} width={300} />
+            </Label>
+        );
+    }
+
+    function onMouseOver(evt: KonvaEventObject<MouseEvent>, idx: number) {
+        var rectangle = evt.target.attrs;
+        if (rectangle) {
+            setSelectedTooltip({ x: rectangle.x + rectangle.width + 10, y: rectangle.y + rectangle.height / 2, idx });
+        }
+    }
+
+
     return (
         <Stage
+            //TODO newWidth + 100 =? is 100 reasonable?
             width={pageWidth}
             height={pageHeight}
             onWheel={handleWheel}
@@ -68,18 +105,22 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
                     setOriginalWidth={setOriginalWidth}
                     setNewWidth={setNewWidth}
                 />
-                {polygons?.map(polygon => <Rect
-                    x={(newWidth / originalWidth) * polygon.x}
-                    y={(pageHeight / originalHeight) * polygon.y}
-                    width={(newWidth / originalWidth) *polygon.width}
-                    height={(pageHeight / originalHeight) * polygon.height}
-                    strokeWidth={1}
-                    stroke="red"
-                    shadowBlur={5}
-                    onClick={() => console.log('ee')}
-                    
-                />)}
+                {polygons?.map((polygon, idx) =>
+                    <Rect
+                        x={(newWidth / originalWidth) * polygon.x}
+                        y={(pageHeight / originalHeight) * polygon.y}
+                        width={(newWidth / originalWidth) * polygon.width}
+                        height={(pageHeight / originalHeight) * polygon.height}
+                        strokeWidth={1}
+                        stroke="red"
+                        shadowBlur={5}
+                        onMouseOver={e => onMouseOver(e, idx)}
+                        onMouseLeave={() => setSelectedTooltip(null)}
+                    />
+                )}
+
             </Layer>
+            <Layer>{showTooltip()}</Layer>
         </Stage>)
 };
 

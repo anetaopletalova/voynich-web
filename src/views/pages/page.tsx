@@ -16,7 +16,6 @@ const Page = () => {
     const { classificationApi } = useApi();
     const [classifications, setClassifications] = useState<IPageClassification[]>([]);
     const [selectedClassification, setSelectedClassification] = useState<IPageClassification | null>(null);
-    const [imgHeight, setImgHeight] = useState<number>();
     const theme = useTheme();
     const styles = useMemo(() => createStyles(), []);
     const [pageHeight, setPageHeight] = useState(window.innerHeight);
@@ -54,7 +53,7 @@ const Page = () => {
     }, [page, params])
 
     useEffect(() => {
-        selectedClassification && setPolygons(selectedClassification.markings);
+        selectedClassification ? setPolygons(selectedClassification.markings) : setPolygons([]);
     }, [selectedClassification])
 
 

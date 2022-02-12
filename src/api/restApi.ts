@@ -116,7 +116,6 @@ export const useApi = () => {
     const classificationApi = {
         getByPageId: (userId: number, params: IClassificationParameters) => 
             handleRequest<IPageClassificationResponse>(instance.get(`/classification/page/${userId}`, { params })),
-        // getDetails: (classificationId: number) => handleRequest<IClassificationDetailResponse>(instance.get(`/classification/${classificationId}`)),
         visit: (userId: number, classificationId: number) =>
             handleRequest(instance.post(`/visit/${userId}`, { classificationId })),
         favorites:
@@ -128,9 +127,6 @@ export const useApi = () => {
         },
         getAll: (userId: number, params: IClassificationParameters) => 
             handleRequest<IPageClassificationResponse>(instance.get(`/classification/all/${userId}`, { params })),
-        // getAllByUser: (userName: string, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/user`, { params: { page, userName } })),
-        // getAllWithNote: (userId: number, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/note/${userId}`, { params: { page } })),
-        // getAllFavorite: (userId: number, page: number) => handleRequest<IPageClassificationResponse>(instance.get(`/classification/favorite/${userId}`, { params: { page } })),
     }
 
     const notesApi = {

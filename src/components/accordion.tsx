@@ -4,7 +4,7 @@ import { IPageClassification } from '../types/general';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
-import { Divider, IconButton } from '@mui/material';
+import { Checkbox, Divider, IconButton } from '@mui/material';
 import StickyNote2Icon from '@mui/icons-material/StickyNote2';
 import { formatDate, isEmptyObject } from '../utils';
 import FavoriteStar from '../views/classifications/favorite';
@@ -30,7 +30,6 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
     const handleChange =
         (selected: IPageClassification) => (event: React.SyntheticEvent, newExpanded: boolean) => {
             setExpanded(newExpanded ? selected.classificationId : false);
-            //TODO Do i need both these methods?? probably only one combined
             onClassificationSelect(newExpanded ? selected : null);
             onItemSelect(selected);
         };
@@ -64,40 +63,49 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
                                         <FavoriteStar item={item} onStarToggle={(updated) => refresh(updated)} />
                                     </div>
                                 </div>
-                                {expanded === item.classificationId && <Divider />}
+                                {expanded === item.classificationId && <Divider style={{ background: 'black' }} />}
                             </div>
                         </AccordionSummary>
                         <AccordionDetails>
                             <div style={styles.fullWidth as React.CSSProperties}>
                                 {item.userId && (
                                     <>
-                                        <IconButton
-                                            color='secondary'
-                                            onClick={() => displayUsersClassifications(item.userName)}
-                                            component="span"
-                                        >
-                                            <PersonIcon />
-                                        </IconButton>
-                                        {item.userName}
+                                        <span style={styles.subtitle}>User</span>
+                                        <div>
+                                            <IconButton
+                                                color='secondary'
+                                                onClick={() => displayUsersClassifications(item.userName)}
+                                                component="span"
+                                            >
+                                                <PersonIcon />
+                                            </IconButton>
+                                            {item.userName}
+                                        </div>
+                                        <Divider />
                                     </>
                                 )}
                                 {item.description && (
                                     <div style={styles.indent}>
-                                        <span>Description </span> 
+                                        <span style={styles.subtitle}>Description </span>
                                         <span> {item.description} </span>
+                                        <Divider />
                                     </div>
                                 )}
-                                {/* No ID specified here , onMouseOver will highlight connected polygon if possible*/}
                                 {!!item.markings.length &&
                                     (
-                                        <div style={styles.indent}>
-                                            <span>Markings</span>
-                                            {item.markings.map((marking, index) => (
-                                                <div style={styles.marking} key={index} onMouseOver={() => console.log('xxx')}>
-                                                    <FiberManualRecordIcon sx={{ fontSize: 10 }} />
-                                                    {marking.description}
-                                                </div>))}
-                                        </div>
+                                        <>
+                                            <div style={styles.indent}>
+                                                <span style={styles.subtitle}>Markings</span>
+                                                {item.markings.map((marking, index) => (
+                                                    <div style={styles.marking} key={index} onMouseOver={() => console.log(index)}>
+                                                        <FiberManualRecordIcon sx={{ fontSize: 8, padding: '0 5px' }} />
+                                                        {marking.description}
+                                                    </div>
+                                                ))}
+
+                                            </div>
+                                            <Divider />
+                                        </>
                                     )}
                                 <NoteView item={item} onNoteUpdate={(updated) => refresh(updated)} />
                             </div>
@@ -109,7 +117,7 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
     );
 }
 
-const createStyles = (theme: Theme) => (
+const createStyles = (theme: Theme): { [key: string]: React.CSSProperties } => (
     {
         fullWidth: {
             width: '100%',
@@ -129,10 +137,13 @@ const createStyles = (theme: Theme) => (
         controls: { display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', flex: 1 },
         indent: {
             padding: '10px',
-            verticalMargin: '15px',
+            margin: '15px 0',
         },
         marking: {
-            paddingLeft: '16px'
+            padding: '5px 16px',
+        },
+        subtitle: {
+            fontWeight: 'bold',
         }
     }
 );

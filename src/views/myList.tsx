@@ -45,7 +45,6 @@ const MyList = () => {
 
     //for some reason it otherwise doesnt call the emthod with username param
     useMountEffect(() => {
-        //console.log(location.state.userName);
         if (location?.state?.userName) {
             const newParams = { ...params, userName };
             setParams(newParams);
@@ -85,9 +84,9 @@ const MyList = () => {
     }, [])
 
     const searchByText = (filterText: string) => {
-        console.log('ss');
         setUserName(filterText);
         setSelectedClassification(null);
+        setPageName('');
     };
 
     return (

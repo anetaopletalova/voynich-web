@@ -99,98 +99,119 @@ const NoteView: React.FC<INoteViewProps> = ({ item, onNoteUpdate }) => {
         }
     }
 
-    return (<div>
-        {!isEmptyObject(item.note) && !openNote &&
-            <div style={styles.note}>
-                <div>Note</div>
-                <div style={styles.noteText}>
-                    {item.note?.text}
-                </div>
-                <div>
+    return (
+        <div style={styles.container}>
+            <span style={styles.subtitle}>Note</span>
+            <div>
+                {!isEmptyObject(item.note) && !openNote &&
+                    <div style={styles.note}>
+                        <div style={styles.noteText}>
+                            {item.note?.text}
+                        </div>
+                        <div style={styles.saveNote}>
+                            <IconButton
+                                color='primary'
+                                onClick={() => editNote(item)}
+                                component="span"
+                                style={styles.noteIcon}
+                            >
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton
+                                color='primary'
+                                onClick={() => deleteNote(item)}
+                                component="span"
+                                style={styles.noteIcon}
+                            >
+                                <DeleteForeverIcon />
+                            </IconButton>
+                        </div>
+                    </div>
+                }
+                {isEmptyObject(item.note) && !openNote && (
                     <IconButton
-                        color='primary'
-                        onClick={() => editNote(item)}
+                        color='secondary'
+                        onClick={() => setOpenNote(true)}
                         component="span"
-                        style={styles.addNoteIcon}
+                        style={styles.noteIcon}
                     >
-                        <EditIcon />
+                        <NoteAddIcon />
                     </IconButton>
-                    <IconButton
-                        color='primary'
-                        onClick={() => deleteNote(item)}
-                        component="span"
-                        style={styles.addNoteIcon}
-                    >
-                        <DeleteForeverIcon />
-                    </IconButton>
-                </div>
+                )}
+                {openNote &&
+                    <div style={styles.fullWidth}>
+                        <TextField
+                            style={styles.flex}
+                            multiline
+                            maxRows={5}
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            color='primary'
+                                            onClick={() => { note === '' ? setOpenNote(false) : setNote('') }}
+                                            component="span"
+                                            style={styles.noteIcon}
+                                        >
+                                            <CloseIcon />
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <Button
+                            disabled={!note}
+                            style={styles.saveNote}
+                            onClick={() => saveNote(item)}>Save note</Button>
+                    </div>
+                }
             </div>
-        }
-        {isEmptyObject(item.note) && !openNote && (
-            <IconButton
-                color='secondary'
-                onClick={() => setOpenNote(true)}
-                component="span"
-                style={styles.addNoteIcon}
-            >
-                <NoteAddIcon />
-            </IconButton>
-        )}
-        {openNote &&
-            <div style={styles.fullWidth}>
-                <TextField
-                    style={styles.flex}
-                    multiline
-                    maxRows={5}
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <IconButton
-                                    color='primary'
-                                    onClick={() => { setNote('') }}
-                                    component="span"
-                                    style={styles.addNoteIcon}
-                                >
-                                    <CloseIcon />
-                                </IconButton>
-                            </InputAdornment>
-                        ),
-                    }}
-                />
-                <Button
-                    disabled={!note}
-                    onClick={() => saveNote(item)}>Save note</Button>
-            </div>
-        }
-    </div>
+        </div>
     )
 }
 
 const createStyles = (theme: Theme): { [key: string]: React.CSSProperties } => (
     {
         fullWidth: {
-            width: '100%',
+            width: '95%',
             textAlign: 'left',
             paddingBottom: '5px',
             marginLeft: '10px',
         },
-        addNoteIcon: {
+        noteIcon: {
             width: 'auto',
         },
         flex: {
-            width: '90%',
+            width: '100%',
         },
         note: {
-            backgroundColor: 'lightgray',
+            //backgroundColor: 'lightgray',
             borderRadius: '5px',
             marginLeft: '10px',
-            padding: '5px',
+            padding: '5px 0',
+            display: 'flex',
         },
         noteText: {
             width: '100%',
-        }
+            borderRadius: '5px',
+            // borderWidth: '1px',
+            // borderStyle: 'solid',
+            // borderColor: 'gray',
+            //padding: '5px',
+            //boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+        },
+        container: {
+           paddingTop: '10px',
+        },
+        saveNote: {
+            float: 'right',
+            display: 'flex'
+        },
+        subtitle: {
+            fontWeight: 'bold',
+        },
     }
 );
 

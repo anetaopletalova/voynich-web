@@ -24,7 +24,6 @@ const PageClassificationView: React.FC<IPageClassificationViewProps> = ({ classi
     const [currentClassifications, setCurrentClassifications] = useState<IPageClassification[]>(classifications);
    
 
-    //console.log(classifications);
     const refresh = (updatedItem: IPageClassification) => {
         const updatedClassification = currentClassifications.map(obj => {
             if (obj.classificationId === updatedItem.classificationId)
@@ -56,11 +55,16 @@ const PageClassificationView: React.FC<IPageClassificationViewProps> = ({ classi
         onPaginationChange(p);
     };
 
+    const getPaginationCount = () => {
+       const count = totalItems % 10 === 0 ? Math.floor(totalItems / 10) : (Math.floor((totalItems / 10)) + 1);
+       console.log(count);
+       return count;
+    }
+
     return (
         <>
             <Pagination
-                //TODO count the pages 
-                count={totalItems}
+                count={getPaginationCount()}
                 size="large"
                 page={page}
                 onChange={handlePageChange}
