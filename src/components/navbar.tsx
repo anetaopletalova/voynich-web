@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { AppBar, Theme, Toolbar, Typography, useTheme } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
-import { AccountCircle, Logout } from '@mui/icons-material';
+import { AccountCircle } from '@mui/icons-material';
 import PopupMenu from './menu';
 import BasicModal from './modal';
 import PasswordChange from '../views/auth/passwordChange';
@@ -19,7 +19,7 @@ const Navbar = () => {
     return (
         <AppBar position='static' color='primary' style={{ display: location.pathname === '/login' ? 'none' : 'block' }}>
             <Toolbar style={styles.navbar}>
-                <div style={styles.row as React.CSSProperties}>
+                <div style={styles.row}>
                     <Typography variant="h6" component="div">
                         <Link to="/" style={styles.headerLink}>Home</Link>
                     </Typography>
@@ -37,7 +37,7 @@ const Navbar = () => {
     );
 };
 
-const createStyles = (theme: Theme) => (
+const createStyles = (theme: Theme): { [key: string]: React.CSSProperties } => (
     {
         hiddenNavbar: {
             display: 'none !important',

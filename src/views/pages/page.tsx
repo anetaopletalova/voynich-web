@@ -89,7 +89,7 @@ const Page = () => {
 
 
     return (
-        <div style={styles.content as React.CSSProperties}>
+        <div style={styles.content}>
             <div id='page' style={styles.pageContent}>
                 <Canvas pageName={pageName} pageHeight={pageHeight} pageWidth={pageWidth} polygons={polygons} />
             </div>
@@ -109,7 +109,7 @@ const Page = () => {
     );
 };
 
-const createStyles = () => (
+const createStyles = () : { [key: string]: React.CSSProperties } => (
     {
         canvas: {
             position: 'absolute',

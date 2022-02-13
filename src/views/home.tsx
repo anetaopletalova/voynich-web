@@ -41,7 +41,7 @@ const Home = () => {
                 {/* nechat true??? */}
                 <SearchInput onSearch={searchByText} onTextChange={true} />
             </div>
-            <div style={styles.pagesContainer as React.CSSProperties}>
+            <div style={styles.pagesContainer}>
                 {filteredPages &&
                     filteredPages.map(page => (
                         <PageContainer page={page} key={page.id} />
@@ -72,7 +72,7 @@ const PageContainer: React.FC<IPageContainerProps> = ({ page }) => {
     )
 }
 
-const createStyles = (theme: Theme) => (
+const createStyles = (theme: Theme) : { [key: string]: React.CSSProperties } => (
     {
         imagePreview: {
             paddingLeft: '25px',

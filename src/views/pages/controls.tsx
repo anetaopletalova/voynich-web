@@ -21,9 +21,9 @@ const Controls: React.FC<IControlProps> = ({ onlyWithNote, setOnlyWithNote, only
     const styles = useMemo(() => createStyles(theme), [theme]);
 
     return (
-        <div style={styles.controls as React.CSSProperties}>
-            <div style={styles.row as React.CSSProperties}>
-                <div style={styles.controlItem as React.CSSProperties}>
+        <div style={styles.controls}>
+            <div style={styles.row}>
+                <div style={styles.controlItem}>
                     <Checkbox
                         checked={onlyWithNote}
                         onChange={() => {
@@ -32,7 +32,7 @@ const Controls: React.FC<IControlProps> = ({ onlyWithNote, setOnlyWithNote, only
                     />
                     <StickyNote2Icon  color='secondary'/>
                 </div>
-                <div style={styles.controlItem as React.CSSProperties}>
+                <div style={styles.controlItem}>
                     <Checkbox
                         checked={onlyFavorite}
                         onChange={() => {
@@ -42,7 +42,7 @@ const Controls: React.FC<IControlProps> = ({ onlyWithNote, setOnlyWithNote, only
                     <StarIcon color='secondary' />
                 </div>
             </div>
-            <div style={styles.controls as React.CSSProperties}>
+            <div style={styles.controls}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DatePicker
                         label="Select date to"
@@ -66,7 +66,7 @@ const Controls: React.FC<IControlProps> = ({ onlyWithNote, setOnlyWithNote, only
     );
 }
 
-const createStyles = (theme: Theme) => (
+const createStyles = (theme: Theme): { [key: string]: React.CSSProperties } => (
     {
         fullWidth: {
             width: '100%',

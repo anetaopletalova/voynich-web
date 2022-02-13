@@ -4,7 +4,7 @@ import { IPageClassification } from '../types/general';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
-import { Checkbox, Divider, IconButton } from '@mui/material';
+import { Divider, IconButton } from '@mui/material';
 import StickyNote2Icon from '@mui/icons-material/StickyNote2';
 import { formatDate, isEmptyObject } from '../utils';
 import FavoriteStar from '../views/classifications/favorite';
@@ -52,13 +52,13 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
                         key={item.classificationId}
                     >
                         <AccordionSummary aria-controls={item.classificationId.toString()} id={item.classificationId.toString()}>
-                            <div style={styles.fullWidth as React.CSSProperties}>
+                            <div style={styles.fullWidth}>
                                 <div style={styles.row}>
                                     <div style={styles.classificationId}>
                                         #{item.classificationId}
                                     </div>
                                     {formatDate(item.createdAt)}
-                                    <div style={styles.controls as React.CSSProperties}>
+                                    <div style={styles.controls}>
                                         {!isEmptyObject(item.note) && <StickyNote2Icon />}
                                         <FavoriteStar item={item} onStarToggle={(updated) => refresh(updated)} />
                                     </div>
@@ -67,7 +67,7 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
                             </div>
                         </AccordionSummary>
                         <AccordionDetails>
-                            <div style={styles.fullWidth as React.CSSProperties}>
+                            <div style={styles.fullWidth}>
                                 {item.userId && (
                                     <>
                                         <span style={styles.subtitle}>User</span>

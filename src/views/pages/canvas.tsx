@@ -26,7 +26,6 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
     const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
         e.evt.preventDefault();
         var scaleBy = 1.02;
-        //current target je scale, target je rect
         var oldScale = e.currentTarget.scaleX();
         var pointer = e.currentTarget.getRelativePointerPosition();
         if (pointer) {
@@ -39,7 +38,6 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
             console.log(mousePointTo);
             // how to scale? Zoom in? Or zoom out?
             let direction = e.evt.deltaY > 0 ? -1 : 1;
-            //console.log('dir', direction)
 
             // when we zoom on trackpad, e.evt.ctrlKey is true
             // in that case lets revert direction
@@ -107,6 +105,7 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
                 />
                 {polygons?.map((polygon, idx) =>
                     <Rect
+                        key={idx}
                         x={(newWidth / originalWidth) * polygon.x}
                         y={(pageHeight / originalHeight) * polygon.y}
                         width={(newWidth / originalWidth) * polygon.width}
