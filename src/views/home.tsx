@@ -1,8 +1,8 @@
 import { Badge, Theme, useTheme } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useApi } from '../api/restApi';
 import SearchInput from '../components/search';
+import { useLookup } from '../context/data';
 import { useMountEffect } from '../helpers/hooks';
 import { IPage } from '../types/general';
 
@@ -11,18 +11,18 @@ interface IPageContainerProps {
 }
 
 const Home = () => {
-    const { pagesApi } = useApi();
     const [pages, setPages] = useState<IPage[]>([]);
     const [filteredPages, setFilteredPages] = useState<IPage[]>([]);
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
+    const {getPages} = useLookup();
 
     useMountEffect(() => {
         const loadPages = async () => {
-            const res = await pagesApi.getAll();
-            if (res.ok && res.data) {
-                setPages(res.data);
-                setFilteredPages(res.data);
+            const res = await getPages();
+            if (res) {
+                setPages(res);
+                setFilteredPages(res);
             }
         };
 
@@ -38,13 +38,13 @@ const Home = () => {
     return (
         <>
             <div style={styles.searchContainer}>
-            {/* nechat true??? */}
-            <SearchInput onSearch={searchByText} onTextChange={true} />
+                {/* nechat true??? */}
+                <SearchInput onSearch={searchByText} onTextChange={true} />
             </div>
             <div style={styles.pagesContainer as React.CSSProperties}>
                 {filteredPages &&
                     filteredPages.map(page => (
-                        <PageContainer page={page} key={page.id}/>
+                        <PageContainer page={page} key={page.id} />
                     ))}
             </div>
         </>
@@ -57,11 +57,9 @@ const PageContainer: React.FC<IPageContainerProps> = ({ page }) => {
     const styles = useMemo(() => createStyles(theme), [theme]);
 
     const displayPage = () => {
-        history.push({
-            pathname: '/page',
-            state: page,
-        });
-    }
+        history.push(`/page/${page.id}`);
+    };
+
     return (
         <div onClick={displayPage} style={styles.imagePreview}>
             <Badge color="secondary" badgeContent={`#${page.id}`} anchorOrigin={{
@@ -70,7 +68,8 @@ const PageContainer: React.FC<IPageContainerProps> = ({ page }) => {
             }}>
                 <img src={`/previews/${page.name}`} alt={'voynich'} width={140} height={200} style={styles.pagePreview} />
             </Badge>
-        </div>)
+        </div>
+    )
 }
 
 const createStyles = (theme: Theme) => (

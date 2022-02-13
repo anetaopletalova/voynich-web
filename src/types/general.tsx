@@ -101,3 +101,8 @@ export interface IClassificationParameters {
     favorite?: boolean;
     userName?: string;
 }
+
+export interface IChangePassword {
+    oldPassword: string;
+    newPassword: string;
+}

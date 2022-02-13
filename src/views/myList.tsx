@@ -66,7 +66,6 @@ const MyList = () => {
         //setPage(0);
         const newParams = { page, dateTo: toServerDateFormat(dateTo), withNote: onlyWithNote, favorite: onlyFavorite, userName };
         setParams(newParams);
-        console.log('xx', newParams);
         loadClassifications(newParams);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [onlyWithNote, onlyFavorite, dateTo, userName, page])
