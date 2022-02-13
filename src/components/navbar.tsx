@@ -1,12 +1,20 @@
 import React, { useMemo } from 'react';
-import { AppBar, IconButton, Theme, Toolbar, Typography, useTheme } from '@mui/material';
+import { AppBar, Theme, Toolbar, Typography, useTheme } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
-import { AccountCircle } from '@mui/icons-material';
+import { AccountCircle, Logout } from '@mui/icons-material';
+import PopupMenu from './menu';
+import BasicModal from './modal';
+import PasswordChange from '../views/auth/passwordChange';
+import { useAuth } from '../context/auth';
 
 const Navbar = () => {
     const location = useLocation();
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+    const { logout } = useAuth();
 
     return (
         <AppBar position='static' color='primary' style={{ display: location.pathname === '/login' ? 'none' : 'block' }}>
@@ -20,7 +28,9 @@ const Navbar = () => {
                     </Typography>
                 </div>
                 <div>
-                    <IconButton onClick={() => console.log('account')} > <AccountCircle sx={{ color: 'white' }} /> </IconButton>
+                    <PopupMenu menuItems={[{ title: 'Change Password', handleClick: handleOpen }, { title: 'Logout', handleClick: logout }]}
+                        Icon={<AccountCircle sx={{ color: 'white' }} />} />
+                    <BasicModal opened={open} handleClose={handleClose} content={<PasswordChange onSuccess={handleClose} />} />
                 </div>
             </Toolbar>
         </AppBar >

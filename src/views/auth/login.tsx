@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Form, Formik, Field, ErrorMessage } from 'formik';
 import { object, string } from 'yup';
 import { useAuth } from '../../context/auth';
 import { useApi } from '../../api/restApi';
-import './login.scss';
 import { AxiosError } from 'axios';
-import { useMountEffect } from '../../helpers/hooks';
-import { Button } from '@mui/material';
+import { Button, Theme, useTheme } from '@mui/material';
 
 const validationSchema = object({
-    //add email() validation
+    //TODO add email() validation
     email: string().required(),
     password: string().required(),
 });
@@ -19,14 +17,6 @@ const initialValues = {
     email: '',
     password: '',
 };
-
-// const LogoutReasonMessages = {
-//     [LOGOUT_REASONS.expired]: 'You have been logged out due to inactivity.',
-//     [LOGOUT_REASONS.loggedOut]: 'You have successfully logged out.',
-//     [LOGOUT_REASONS.error]:
-//         'An error has occurred. Please try logging in again.',
-//     [LOGOUT_REASONS.pwdChanged]: 'Password Successfully Reset!',
-// };
 
 const LoginErrorMessages = {
     invalid: 'Login failed. Invalid credentials',
@@ -38,6 +28,8 @@ const Login = () => {
     const history = useHistory();
     const [error, setError] = useState<string>('');
     const { authApi } = useApi();
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
 
     useEffect(() => {
         // If logged in already, redirect to dashboard
@@ -54,10 +46,11 @@ const Login = () => {
                 password,
             });
 
-            if (response.data && response.ok) {
+            if (response.data) {
                 login(response.data);
             }
             history.replace('/');
+
         } catch (e) {
             const error = e as AxiosError;
             if (error.response)
@@ -72,7 +65,7 @@ const Login = () => {
         }
     };
     return (
-        <div className='login-container'>
+        <div style={styles.loginContainer}>
             <Formik
                 onSubmit={handleSubmit}
                 validationSchema={validationSchema}
@@ -80,12 +73,12 @@ const Login = () => {
             >
                 {(errors) => (
                     <Form>
-                        <span className='label'>Email</span>
+                        <span style={styles.label}>Email</span>
                         <div>
                             <Field name='email' placeholder='Email' className='text-field' />
                             <ErrorMessage name='email' className='error-message' component="div" />
                         </div>
-                        <span className='label'>Password</span>
+                        <span style={styles.label}>Password</span>
                         <div>
                             <Field
                                 name='password'
@@ -95,16 +88,36 @@ const Login = () => {
                             />
                             <ErrorMessage name='password' className='error-message' component="div" />
                         </div>
-                        {/* <Link to='/login/forgottenPassword'>
-                            Forgot password
-                        </Link> */}
-                        <Button className='submit-button' color='secondary' variant="contained" type='submit'>Log In</Button>
+                        <Button style={styles.submitButton} color='secondary' variant="contained" type='submit'>Log In</Button>
                     </Form>
                 )}
             </Formik>
-            <p className='login-error'>{error}</p>
+            <p>{error}</p>
         </div>
     );
 };
+
+const createStyles = (theme: Theme): { [key: string]: React.CSSProperties } => (
+    {
+        loginContainer: {
+            padding: '30px',
+            boxSizing: 'content-box',
+            width: '350px',
+            margin: 'auto',
+            borderRadius: '5px',
+            boxShadow: '#0002 0 0 30px',
+            overflow: 'hidden',
+            flexDirection: 'column',
+        },
+        label: {
+            textAlign: 'left',
+            marginLeft: '10px',
+            marginTop: '20px',
+        },
+        submitButton: {
+            margin: '25px 5px',
+        }
+    }
+);
 
 export default Login;

@@ -12,12 +12,16 @@ import './index.scss';
 import Home from './views/home';
 import Page from './views/pages/page';
 import MyList from './views/myList';
+import PasswordChange from './views/auth/passwordChange';
+import { LookupProvider } from './context/data';
 
 const RootProviders = ({ children }) => (
   <Router>
     <ThemeProvider theme={theme}>
       <AuthProvider>
-        {children}
+        <LookupProvider>
+          {children}
+        </LookupProvider>
       </AuthProvider>
     </ThemeProvider>
   </Router>
@@ -29,15 +33,15 @@ const App = () => {
     <>
       <RootProviders>
         <div className='App'>
-        <Toaster position='bottom-right' />
+          <Toaster position='bottom-right' />
           <Navbar />
           <div className="page-wrapper">
             <Switch>
-              <AuthenticatedRoute path="/" exact component={Home} />
-              <AuthenticatedRoute path="/page" component={Page} />
+              <Route path="/login" component={Login} /> 
+              <AuthenticatedRoute path="/page/:pageId" component={Page} />
               <AuthenticatedRoute path="/myList" component={MyList} />
-              <Route path="/login" component={Login} />
-              {/* <Route path="/register" component={Register} /> */}
+              <AuthenticatedRoute path="/passwordchange" component={PasswordChange} />
+              <AuthenticatedRoute path="/" exact component={Home} />              
             </Switch>
           </div>
         </div>

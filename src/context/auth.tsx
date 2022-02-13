@@ -56,9 +56,6 @@ export const AuthProvider = ({ children }) => {
                     console.log('fetched', response.data)
                     const decoded = decodeToken(token);
                     const d = decoded as IDecodedToken;
-                    //const userResponse = await authApi.getStaff(d.uid);
-                    //need to store token on BE to auto login the user?
-                    //refresh token shoud be stored in local storage
                     login({
                         email: 'Sofik',
                         token,
@@ -84,7 +81,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('refresh', refreshToken);
         setToken(token);
         setAuthState(data);
-        console.log('login', token)
 
         silentRefreshTimer = setTimeout(refresh, getTimeoutFromToken(token));
         return true;
@@ -97,16 +93,16 @@ export const AuthProvider = ({ children }) => {
             return false;
         } else {
             try {
-                console.log(refreshToken)
                 const response = await authApi.refreshToken(refreshToken);
-                console.log(response)
                 if ([200, 201].includes(response.status)) {
-                    const { accessToken, refreshToken } = response.data;
-                    setToken(accessToken);
+                    const { token, refreshToken } = response.data;
+                    setToken(token);
+                    console.log(token);
                     localStorage.setItem('refresh', refreshToken);
+                    console.log(refreshToken);
                     silentRefreshTimer = setTimeout(
                         refresh,
-                        getTimeoutFromToken(accessToken)
+                        getTimeoutFromToken(token)
                     );
                     return true;
                 } else {
@@ -122,6 +118,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         deleteToken();
+        setAuthState(null);
         localStorage.removeItem('refresh');
         clearTimeout(silentRefreshTimer);
         history.push('/login');

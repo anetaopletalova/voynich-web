@@ -9,6 +9,7 @@ import {
     IAddNotePost,
     IAddToFavoritesResponse,
     IApiResponse,
+    IChangePassword,
     IClassificationParameters,
     IEditNotePost,
     ILoginData,
@@ -103,10 +104,11 @@ export const useApi = () => {
 
     const authApi = {
         logIn: (data: ILoginData) =>
-            handleRequest(instance.post<ILoginResponse>('/login', {}, { auth: data })),
-        //signUp: (data: any) => handleRequest(instance.post('user/client', data)),
+            instance.post<ILoginResponse>('/login', {}, { auth: data }),
         refreshToken: (refreshToken: string) =>
             instance.post<any>('/refresh', { refreshToken }),
+        changePassword: (userId: number, data: IChangePassword) =>
+            handleRequest<ILoginResponse>(instance.post(`/passwordChange/${userId}`, data)),
     };
 
     const pagesApi = {
@@ -114,7 +116,7 @@ export const useApi = () => {
     }
 
     const classificationApi = {
-        getByPageId: (userId: number, params: IClassificationParameters) => 
+        getByPageId: (userId: number, params: IClassificationParameters) =>
             handleRequest<IPageClassificationResponse>(instance.get(`/classification/page/${userId}`, { params })),
         visit: (userId: number, classificationId: number) =>
             handleRequest(instance.post(`/visit/${userId}`, { classificationId })),
@@ -125,7 +127,7 @@ export const useApi = () => {
             remove: (userId: number, favoriteId: number) =>
                 handleRequest(instance.delete(`/favorite/${userId}`, { params: { favoriteId } })),
         },
-        getAll: (userId: number, params: IClassificationParameters) => 
+        getAll: (userId: number, params: IClassificationParameters) =>
             handleRequest<IPageClassificationResponse>(instance.get(`/classification/all/${userId}`, { params })),
     }
 
