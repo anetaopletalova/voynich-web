@@ -46,18 +46,16 @@ export const AuthProvider = ({ children }) => {
     useMountEffect(() => {
         //used when refresh token is expired
         const fetchData = async token => {
-            console.log('FETCHING', token)
             try {
                 const response = await authApi.refreshToken(token);
                 console.log(response.status)
                 if (response.status === 200) {
-                    const { token, refreshToken } = response.data;
+                    const { token, refreshToken, user } = response.data;
                     setToken(token);
-                    console.log('fetched', response.data)
                     const decoded = decodeToken(token);
                     const d = decoded as IDecodedToken;
                     login({
-                        email: 'Sofik',
+                        email: user.email,
                         token,
                         refreshToken,
                         userId: d.uid,
@@ -97,9 +95,7 @@ export const AuthProvider = ({ children }) => {
                 if ([200, 201].includes(response.status)) {
                     const { token, refreshToken } = response.data;
                     setToken(token);
-                    console.log(token);
                     localStorage.setItem('refresh', refreshToken);
-                    console.log(refreshToken);
                     silentRefreshTimer = setTimeout(
                         refresh,
                         getTimeoutFromToken(token)

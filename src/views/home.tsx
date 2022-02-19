@@ -38,7 +38,6 @@ const Home = () => {
     return (
         <>
             <div style={styles.searchContainer}>
-                {/* nechat true??? */}
                 <SearchInput onSearch={searchByText} onTextChange={true} />
             </div>
             <div style={styles.pagesContainer}>
