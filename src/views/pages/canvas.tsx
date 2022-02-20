@@ -3,25 +3,31 @@ import { KonvaEventObject } from 'konva/lib/Node';
 import PageImage from './pageImage';
 import { IMarking } from '../../types/general';
 import { useState } from 'react';
+import { useApi } from '../../api/restApi';
 
 interface ICanvasProps {
     pageWidth: number;
     pageHeight: number;
     polygons: IMarking[] | undefined;
     pageName: string;
+    pageId: number;
 }
 
 interface ITooltip {
     x: number;
     y: number;
     idx: number;
+    markings?: IMarking[];
 }
 
-const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageName }) => {
+const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageName, pageId }) => {
     const [originalHeight, setOriginalHeight] = useState(1);
     const [originalWidth, setOriginalWidth] = useState(1);
     const [newWidth, setNewWidth] = useState(1);
     const [selectedTooltip, setSelectedTooltip] = useState<ITooltip | null>(null);
+    const { markingsApi } = useApi();
+    const [markings, setMarkings] = useState<IMarking[]>();
+    const [canvasMode, setCanvasMode] = useState(false);
 
     const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
         e.evt.preventDefault();
@@ -33,9 +39,7 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
                 x: (pointer.x - e.currentTarget.x()) / oldScale,
                 y: (pointer.y - e.currentTarget.y()) / oldScale,
             };
-            //pointer je pozice mysi v obrazku
-            console.log(pointer)
-            console.log(mousePointTo);
+
             // how to scale? Zoom in? Or zoom out?
             let direction = e.evt.deltaY > 0 ? -1 : 1;
 
@@ -59,9 +63,14 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
     };
 
     const showTooltip = () => {
-        if (selectedTooltip === null || !polygons) return null;
+        if (canvasMode) {
+            
+            // misto tooltipu treba by to slo jinak - zobrazit neco jineho
+            if (selectedTooltip === null || !markings || ! markings.length) return null;
 
-        return (
+            const markingDescriptions = markings.map(item => item.description).join('\n');
+
+            return (
             <Label x={selectedTooltip.x} y={selectedTooltip.y} opacity={0.75}>
                 <Tag
                     fill={"black"}
@@ -74,9 +83,29 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
                     shadowOffsetY={10}
                     shadowOpacity={0.2}
                 />
-                <Text text={polygons[selectedTooltip.idx].description} fill={"white"} fontSize={18} padding={5} width={300} />
-            </Label>
-        );
+                <Text text={markingDescriptions} fill={"white"} fontSize={18} padding={5} width={300} />
+            </Label>);
+
+        } else {
+            if (selectedTooltip === null || !polygons) return null;
+
+            return (
+                <Label x={selectedTooltip.x} y={selectedTooltip.y} opacity={0.75}>
+                    <Tag
+                        fill={"black"}
+                        pointerWidth={10}
+                        pointerHeight={10}
+                        lineJoin={"round"}
+                        shadowColor={"black"}
+                        shadowBlur={10}
+                        shadowOffsetX={10}
+                        shadowOffsetY={10}
+                        shadowOpacity={0.2}
+                    />
+                    <Text text={polygons[selectedTooltip.idx].description} fill={"white"} fontSize={18} padding={5} width={300} />
+                </Label>
+            );
+        }
     }
 
     function onMouseOver(evt: KonvaEventObject<MouseEvent>, idx: number) {
@@ -86,16 +115,35 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
         }
     }
 
+    const handleCoordinatesClick = async (e) => {
+        const { x, y } = e.currentTarget.getRelativePointerPosition();
+        const newX = (originalWidth / newWidth) * x;
+        const newY = (originalHeight / pageHeight) * y;
+        if (newX && newY) {
+            const coordinates = { x: newX, y: newY };
+            const res = await markingsApi.getByCoordinates(pageId, coordinates);
+            if (res.ok && res.data) {
+                //TODO asi nebude ani potreba nastavovat takto
+                setCanvasMode(true);
+                setMarkings(res.data.items);
+                setSelectedTooltip({ x, y, markings: res.data.items, idx: 0 });
+                
+            }
+        }
+    }
 
     return (
+        //TODO make canvas sticky
+        //TODO tlacitko na prepnuti canvasMode
         <Stage
             //TODO newWidth + 100 =? is 100 reasonable?
             width={pageWidth}
             height={pageHeight}
             onWheel={handleWheel}
             draggable={true}
+            style={{}}
         >
-            <Layer>
+            <Layer onClick={e => handleCoordinatesClick(e)}>
                 <PageImage
                     imgSource={`/images/${pageName}`}
                     height={pageHeight}
@@ -103,20 +151,21 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
                     setOriginalWidth={setOriginalWidth}
                     setNewWidth={setNewWidth}
                 />
-                {polygons?.map((polygon, idx) =>
-                    <Rect
-                        key={idx}
-                        x={(newWidth / originalWidth) * polygon.x}
-                        y={(pageHeight / originalHeight) * polygon.y}
-                        width={(newWidth / originalWidth) * polygon.width}
-                        height={(pageHeight / originalHeight) * polygon.height}
-                        strokeWidth={1}
-                        stroke="red"
-                        shadowBlur={5}
-                        onMouseOver={e => onMouseOver(e, idx)}
-                        onMouseLeave={() => setSelectedTooltip(null)}
-                    />
-                )}
+                {!canvasMode &&
+                    polygons?.map((polygon, idx) =>
+                        <Rect
+                            key={idx}
+                            x={(newWidth / originalWidth) * polygon.x}
+                            y={(pageHeight / originalHeight) * polygon.y}
+                            width={(newWidth / originalWidth) * polygon.width}
+                            height={(pageHeight / originalHeight) * polygon.height}
+                            strokeWidth={1}
+                            stroke="red"
+                            shadowBlur={5}
+                            onMouseOver={e => onMouseOver(e, idx)}
+                            onMouseLeave={() => setSelectedTooltip(null)}
+                        />
+                    )}
 
             </Layer>
             <Layer>{showTooltip()}</Layer>

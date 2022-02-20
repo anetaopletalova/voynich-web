@@ -106,3 +106,12 @@ export interface IChangePassword {
     oldPassword: string;
     newPassword: string;
 }
+
+export interface ICoordinates {
+    x: number;
+    y: number;
+}
+
+export interface IMarkingResponse {
+    items: IMarking[];
+}

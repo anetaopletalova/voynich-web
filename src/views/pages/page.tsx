@@ -91,7 +91,7 @@ const Page = () => {
     return (
         <div style={styles.content}>
             <div id='page' style={styles.pageContent}>
-                <Canvas pageName={pageName} pageHeight={pageHeight} pageWidth={pageWidth} polygons={polygons} />
+                <Canvas pageName={pageName} pageHeight={pageHeight} pageWidth={pageWidth} polygons={polygons} pageId={Number(pageId)} />
             </div>
             <div style={styles.accordionContainer}>
                 <Controls

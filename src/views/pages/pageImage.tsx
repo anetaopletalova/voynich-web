@@ -23,7 +23,6 @@ const PageImage: React.FC<IPageImageProps> = ({ imgSource, height, setOriginalHe
 
     useEffect(() => {
         if (img) {
-            console.log('reloaded');
             const ratio = img.height / img.width;
             setOriginalHeight(img.height);
             const scaledWidth = height / ratio;
@@ -31,7 +30,7 @@ const PageImage: React.FC<IPageImageProps> = ({ imgSource, height, setOriginalHe
             setNewWidth(scaledWidth);
             setScaledWidth(scaledWidth);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [img, height])
 
     return (img ? <Image image={img} height={height} width={scaledWidth} /> : null);

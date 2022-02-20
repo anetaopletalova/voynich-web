@@ -26,6 +26,7 @@ const MyList = () => {
     const [onlyFavorite, setOnlyFavorite] = useState(false);
     const [dateTo, setDateTo] = useState(new Date());
     const [pageName, setPageName] = useState('');
+    const [pageId, setPageId] = useState<number | null>(null);
     const { authState } = useAuth();
     const defaultParams = { page, dateTo: toServerDateFormat(dateTo) };
     const [params, setParams] = useState<IClassificationParameters>(defaultParams);
@@ -58,6 +59,7 @@ const MyList = () => {
         if (selectedClassification) {
             setPolygons(selectedClassification.markings);
             setPageName(selectedClassification.pageName);
+            setPageId(selectedClassification.pageId);
         }
     }, [selectedClassification])
 
@@ -89,9 +91,9 @@ const MyList = () => {
     };
 
     return (
-        <div style={styles.content as React.CSSProperties}>     
+        <div style={styles.content}>     
             <div id='page' style={styles.pageContent}>        
-                {pageName && <Canvas pageName={pageName} pageHeight={pageHeight} pageWidth={pageWidth} polygons={polygons} />}
+                {pageName && pageId && <Canvas pageName={pageName} pageHeight={pageHeight} pageWidth={pageWidth} polygons={polygons} pageId={pageId}/>}
             </div>
             <div style={styles.accordionContainer}>
                 <SearchInput onSearch={searchByText} hasClearButton={true} defaultValue={userName}/>
@@ -110,7 +112,7 @@ const MyList = () => {
     );
 };
 
-const createStyles = () => (
+const createStyles = (): { [key: string]: React.CSSProperties } => (
     {
         canvas: {
             position: 'absolute',

@@ -48,7 +48,6 @@ export const AuthProvider = ({ children }) => {
         const fetchData = async token => {
             try {
                 const response = await authApi.refreshToken(token);
-                console.log(response.status)
                 if (response.status === 200) {
                     const { token, refreshToken, user } = response.data;
                     setToken(token);

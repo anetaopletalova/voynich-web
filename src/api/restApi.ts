@@ -1,3 +1,4 @@
+import { IMarkingResponse } from './../types/general';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { snakeCase } from 'snake-case';
 import { camelCase } from 'camel-case';
@@ -11,6 +12,7 @@ import {
     IApiResponse,
     IChangePassword,
     IClassificationParameters,
+    ICoordinates,
     IEditNotePost,
     ILoginData,
     ILoginResponse,
@@ -131,12 +133,17 @@ export const useApi = () => {
             handleRequest<IPageClassificationResponse>(instance.get(`/classification/all/${userId}`, { params })),
     }
 
+    const markingsApi = {
+        getByCoordinates: (pageId: number, params: ICoordinates) =>
+            handleRequest<IMarkingResponse>(instance.get(`/markings/${pageId}`, { params })),
+    }
+
     const notesApi = {
         addNote: (userId: number, data: IAddNotePost) => handleRequest<INote>(instance.post(`/note/${userId}`, data)),
         editNote: (userId: number, data: IEditNotePost) => handleRequest<INote>(instance.put(`/note/${userId}`, data)),
         deleteNote: (userId: number, noteId: number) => handleRequest(instance.delete(`/note/${userId}`, { params: { noteId } })),
     }
 
-    return { authApi, pagesApi, classificationApi, notesApi }
+    return { authApi, pagesApi, classificationApi, notesApi, markingsApi }
 
 }

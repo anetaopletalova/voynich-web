@@ -87,7 +87,7 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
                                 {item.description && (
                                     <div style={styles.indent}>
                                         <span style={styles.subtitle}>Description </span>
-                                        <span> {item.description} </span>
+                                        <div style={styles.description}> {item.description} </div>
                                         <Divider />
                                     </div>
                                 )}
@@ -97,7 +97,7 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
                                             <div style={styles.indent}>
                                                 <span style={styles.subtitle}>Markings</span>
                                                 {item.markings.map((marking, index) => (
-                                                    <div style={styles.marking} key={index} onMouseOver={() => console.log(index)}>
+                                                    <div style={styles.marking} key={index}>
                                                         <FiberManualRecordIcon sx={{ fontSize: 8, padding: '0 5px' }} />
                                                         {marking.description}
                                                     </div>
@@ -136,14 +136,17 @@ const createStyles = (theme: Theme): { [key: string]: React.CSSProperties } => (
         },
         controls: { display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', flex: 1 },
         indent: {
-            padding: '10px',
-            margin: '15px 0',
+            padding: '8px',
+            margin: '16px 0',
         },
         marking: {
             padding: '5px 16px',
         },
         subtitle: {
             fontWeight: 'bold',
+        },
+        description: {
+            padding: '5px 16px 16px',
         }
     }
 );
