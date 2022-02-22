@@ -23,19 +23,9 @@ import {
 
 const baseURL = 'http://127.0.0.1:5000/';
 
-// BE uses snake_case and FE camelCase. We translate that using the middleware.
-// These are the exceptions we want to translate as well.
-const customTransformations = {
-    firstname: 'firstName',
-    lastname: 'lastName',
-    middlename: 'middleName',
-    guardianname: 'guardianName',
-    guardianrole: 'guardianRole',
-};
 
 const customCamel = input => {
     const result =
-        customTransformations[input] || // If there's a record in the list above, use that
         (input.includes('_') ? camelCase(input) : input); // If not, translate incoming property names from snake to camel (only if it's really snake_case, i.e. look for the "_" character)
     return result;
 };
@@ -49,7 +39,7 @@ export const instance = applyCaseMiddleware(
         ignoreHeaders: true,
         caseFunctions: {
             camel: customCamel,
-            snake: input => getKeyByValue(customTransformations, input) || snakeCase(input),
+            snake: input => snakeCase(input),
         },
     }
 );
