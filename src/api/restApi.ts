@@ -3,7 +3,6 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { snakeCase } from 'snake-case';
 import { camelCase } from 'camel-case';
 import applyCaseMiddleware from 'axios-case-converter';
-import { getKeyByValue } from '../utils';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/auth';
 import {

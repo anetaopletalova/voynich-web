@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { IconButton, TextField, Theme, useTheme } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
+
 interface ISearchInputProps {
     onSearch: (text: string) => void;
     onTextChange?: boolean;

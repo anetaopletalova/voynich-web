@@ -4,6 +4,8 @@ import PageImage from './pageImage';
 import { IMarking } from '../../types/general';
 import { useState } from 'react';
 import { useApi } from '../../api/restApi';
+import { IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface ICanvasProps {
     pageWidth: number;
@@ -64,30 +66,8 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
 
     const showTooltip = () => {
         if (canvasMode) {
-            
-            // misto tooltipu treba by to slo jinak - zobrazit neco jineho
-            if (selectedTooltip === null || !markings || ! markings.length) return null;
-
+            if (selectedTooltip === null || !markings || !markings.length) return null;
             const markingDescriptions = markings.map(item => item.description).join('\n');
-
-            return (
-            <Label x={selectedTooltip.x} y={selectedTooltip.y} opacity={0.75}>
-                <Tag
-                    fill={"black"}
-                    pointerWidth={10}
-                    pointerHeight={10}
-                    lineJoin={"round"}
-                    shadowColor={"black"}
-                    shadowBlur={10}
-                    shadowOffsetX={10}
-                    shadowOffsetY={10}
-                    shadowOpacity={0.2}
-                />
-                <Text text={markingDescriptions} fill={"white"} fontSize={18} padding={5} width={300} />
-            </Label>);
-
-        } else {
-            if (selectedTooltip === null || !polygons) return null;
 
             return (
                 <Label x={selectedTooltip.x} y={selectedTooltip.y} opacity={0.75}>
@@ -102,7 +82,34 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
                         shadowOffsetY={10}
                         shadowOpacity={0.2}
                     />
-                    <Text text={polygons[selectedTooltip.idx].description} fill={"white"} fontSize={18} padding={5} width={300} />
+                    <Text
+                        text={markingDescriptions}
+                        fill={"white"}
+                        fontSize={18}
+                        padding={5}
+                        width={markings.some(item => item.description.length > 100) ? 300 : undefined}
+                    />
+                </Label>
+            );
+
+        } else {
+            if (selectedTooltip === null || !polygons) return null;
+            const desc = polygons[selectedTooltip.idx].description;
+
+            return (
+                <Label x={selectedTooltip.x} y={selectedTooltip.y} opacity={0.75}>
+                    <Tag
+                        fill={"black"}
+                        pointerWidth={10}
+                        pointerHeight={10}
+                        lineJoin={"round"}
+                        shadowColor={"black"}
+                        shadowBlur={10}
+                        shadowOffsetX={10}
+                        shadowOffsetY={10}
+                        shadowOpacity={0.2}
+                    />
+                    <Text text={desc} fill={"white"} fontSize={18} padding={5} width={desc.length > 100 ? 300 : undefined} />
                 </Label>
             );
         }
@@ -123,53 +130,63 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
             const coordinates = { x: newX, y: newY };
             const res = await markingsApi.getByCoordinates(pageId, coordinates);
             if (res.ok && res.data) {
-                //TODO asi nebude ani potreba nastavovat takto
-                setCanvasMode(true);
-                setMarkings(res.data.items);
-                setSelectedTooltip({ x, y, markings: res.data.items, idx: 0 });
-                
+                if (res.data.items.length) {
+                    setCanvasMode(true);
+                    setMarkings(res.data.items);
+                    setSelectedTooltip({ x, y, markings: res.data.items, idx: 0 });
+                }
             }
         }
     }
 
     return (
-        //TODO make canvas sticky
-        //TODO tlacitko na prepnuti canvasMode
-        <Stage
-            //TODO newWidth + 100 =? is 100 reasonable?
-            width={pageWidth}
-            height={pageHeight}
-            onWheel={handleWheel}
-            draggable={true}
-            style={{}}
-        >
-            <Layer onClick={e => handleCoordinatesClick(e)}>
-                <PageImage
-                    imgSource={`/images/${pageName}`}
-                    height={pageHeight}
-                    setOriginalHeight={setOriginalHeight}
-                    setOriginalWidth={setOriginalWidth}
-                    setNewWidth={setNewWidth}
-                />
-                {!canvasMode &&
-                    polygons?.map((polygon, idx) =>
-                        <Rect
-                            key={idx}
-                            x={(newWidth / originalWidth) * polygon.x}
-                            y={(pageHeight / originalHeight) * polygon.y}
-                            width={(newWidth / originalWidth) * polygon.width}
-                            height={(pageHeight / originalHeight) * polygon.height}
-                            strokeWidth={1}
-                            stroke="red"
-                            shadowBlur={5}
-                            onMouseOver={e => onMouseOver(e, idx)}
-                            onMouseLeave={() => setSelectedTooltip(null)}
-                        />
-                    )}
+        <>
+            {canvasMode &&
+                <IconButton
+                    color='secondary'
+                    onClick={() => { setCanvasMode(false); setSelectedTooltip(null); }}
+                    component="span"
+                    style={{ float: 'right', zIndex: 1 }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            }
+            <Stage
+                width={pageWidth}
+                height={pageHeight}
+                onWheel={handleWheel}
+                draggable={true}
+                style={{ position: 'fixed' }}
+            >
+                <Layer onClick={e => handleCoordinatesClick(e)}>
+                    <PageImage
+                        imgSource={`/images/${pageName}`}
+                        height={pageHeight}
+                        setOriginalHeight={setOriginalHeight}
+                        setOriginalWidth={setOriginalWidth}
+                        setNewWidth={setNewWidth}
+                    />
+                    {!canvasMode &&
+                        polygons?.map((polygon, idx) =>
+                            <Rect
+                                key={idx}
+                                x={(newWidth / originalWidth) * polygon.x}
+                                y={(pageHeight / originalHeight) * polygon.y}
+                                width={(newWidth / originalWidth) * polygon.width}
+                                height={(pageHeight / originalHeight) * polygon.height}
+                                strokeWidth={1}
+                                stroke="red"
+                                shadowBlur={5}
+                                onMouseOver={e => onMouseOver(e, idx)}
+                                onMouseLeave={() => setSelectedTooltip(null)}
+                            />
+                        )}
 
-            </Layer>
-            <Layer>{showTooltip()}</Layer>
-        </Stage>)
+                </Layer>
+                <Layer>{showTooltip()}</Layer>
+            </Stage>
+        </>
+    )
 };
 
 export default Canvas;
