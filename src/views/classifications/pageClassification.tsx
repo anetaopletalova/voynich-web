@@ -1,5 +1,5 @@
 import { Pagination } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useApi } from "../../api/restApi";
 import ClassificationAccordion from "../../components/accordion";
 import { useAuth } from "../../context/auth";
@@ -7,22 +7,17 @@ import { IPageClassification } from "../../types/general";
 
 interface IPageClassificationViewProps {
     classifications: IPageClassification[];
-    //TODO pro pohled na all bude tato metoda nejspis jina, protoze bude muset zobrazit i stranku
     onClassificationSelect: (classification: IPageClassification | null) => void;
     totalItems: number;
     onPaginationChange: (newPage: number) => void;
-    //TODO setPage by mozna melo byt tady??
     page: number;
 }
 
-
-
 const PageClassificationView: React.FC<IPageClassificationViewProps> = ({ classifications, onClassificationSelect, totalItems, onPaginationChange, page }) => {
-   const { classificationApi } = useApi();
+    const { classificationApi } = useApi();
     const { authState } = useAuth();
-    //TODO do i need the currents?? probably yes because of refresh??? check that
     const [currentClassifications, setCurrentClassifications] = useState<IPageClassification[]>(classifications);
-   
+    const styles = useMemo(() => createStyles(), []);
 
     const refresh = (updatedItem: IPageClassification) => {
         const updatedClassification = currentClassifications.map(obj => {
@@ -51,23 +46,29 @@ const PageClassificationView: React.FC<IPageClassificationViewProps> = ({ classi
     }, [classifications])
 
     const handlePageChange = (e, p) => {
+        if(p === page){
+            return;
+        }
         setCurrentClassifications([]);
         onPaginationChange(p);
     };
 
     const getPaginationCount = () => {
-       const count = totalItems % 10 === 0 ? Math.floor(totalItems / 10) : (Math.floor((totalItems / 10)) + 1);
-       return count;
+        const count = totalItems % 10 === 0 ? Math.floor(totalItems / 10) : (Math.floor((totalItems / 10)) + 1);
+        return count;
     }
 
     return (
         <>
-            <Pagination
-                count={getPaginationCount()}
-                size="large"
-                page={page}
-                onChange={handlePageChange}
-            />
+            <div style={styles.column}>
+                <div style={styles.totalCount}>Total count: {totalItems}</div>
+                <Pagination
+                    count={getPaginationCount()}
+                    size="large"
+                    page={page}
+                    onChange={handlePageChange}
+                />
+            </div>
             <ClassificationAccordion
                 classifications={currentClassifications}
                 onClassificationSelect={onClassificationSelect}
@@ -77,5 +78,12 @@ const PageClassificationView: React.FC<IPageClassificationViewProps> = ({ classi
         </>
     )
 }
+
+const createStyles = (): { [key: string]: React.CSSProperties } => (
+    {
+        column: { display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' },
+        totalCount: { marginBottom: '5px', display: 'flex', marginLeft: '15px' },
+    });
+
 
 export default PageClassificationView;

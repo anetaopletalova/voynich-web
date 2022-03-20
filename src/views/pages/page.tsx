@@ -1,6 +1,5 @@
-import { useTheme } from '@emotion/react';
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { useApi } from '../../api/restApi';
 import { useMountEffect } from '../../helpers/hooks';
 import { IClassificationParameters, IMarking, IPageClassification } from '../../types/general';
@@ -10,19 +9,18 @@ import Controls from './controls';
 import Canvas from './canvas';
 import PageClassificationView from '../classifications/pageClassification';
 import { useLookup } from '../../context/data';
-
+const qs = require('query-string');
 
 const Page = () => {
     const { classificationApi } = useApi();
-    const {getPages} = useLookup();
+    const { getPages } = useLookup();
     const [classifications, setClassifications] = useState<IPageClassification[]>([]);
     const [selectedClassification, setSelectedClassification] = useState<IPageClassification | null>(null);
-    const theme = useTheme();
     const styles = useMemo(() => createStyles(), []);
     const [pageHeight, setPageHeight] = useState(window.innerHeight);
     const [pageWidth, setPageWidth] = useState(0);
     const [polygons, setPolygons] = useState<IMarking[]>()
-    const [page, setPage] = useState(0);
+    const [page, setPage] = useState(1);
     const { pageId } = useParams<any>();
     const [totalItems, setTotalItems] = useState<number>(0);
     const [onlyWithNote, setOnlyWithNote] = useState(false);
@@ -32,7 +30,8 @@ const Page = () => {
     const defaultParams = { pageId: Number(pageId), page, dateTo: toServerDateFormat(dateTo) };
     const [params, setParams] = useState<IClassificationParameters>(defaultParams);
     const [pageName, setPageName] = useState('');
-
+    const history = useHistory();
+    const URLparams = useLocation();
 
     const loadClassifications = async (params: IClassificationParameters = defaultParams) => {
         if (pageId && authState) {
@@ -52,14 +51,25 @@ const Page = () => {
         }
     };
 
-
     useMountEffect(() => {
         loadPages();
         loadClassifications();
+        if (URLparams.search) {
+            const value = qs.parse(URLparams.search);
+            setPage(value.page);
+        }
     })
 
     useEffect(() => {
-        //TODO check if it updates correctly
+        const value = qs.parse(URLparams.search);
+        if (classifications.length && value.classificationId) {
+            const selected = classifications.find(cl => cl.classificationId === Number(value.classificationId));
+            selected && setSelectedClassification(selected);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [classifications])
+
+    useEffect(() => {
         const newParams = { ...params, page };
         loadClassifications(newParams);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,12 +79,11 @@ const Page = () => {
         selectedClassification ? setPolygons(selectedClassification.markings) : setPolygons([]);
     }, [selectedClassification])
 
-
     useEffect(() => {
-        setPage(0);
+        setPage(1);
         const params: IClassificationParameters = { pageId: Number(pageId), page, dateTo: toServerDateFormat(dateTo), withNote: onlyWithNote, favorite: onlyFavorite };
         setParams(params);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [onlyWithNote, onlyFavorite, dateTo])
 
     useLayoutEffect(() => {
@@ -87,6 +96,16 @@ const Page = () => {
         return () => window.removeEventListener('resize', updateSize);
     }, [])
 
+    const setUrlParams = (classif: IPageClassification | null) => {
+        let params = new URLSearchParams();
+        params.append('page', page.toString());
+        if (classif) {
+            params.append('classificationId', classif.classificationId.toString());
+            history.replace({ pathname: `/page/${Number(pageId)}`, search: '?' + params });
+        } else {
+            history.replace({ pathname: `/page/${Number(pageId)}`, search: '?' + params });
+        }
+    }
 
     return (
         <div style={styles.content}>
@@ -102,14 +121,25 @@ const Page = () => {
                     dateTo={dateTo}
                     setDateTo={setDateTo}
                 />
-                <PageClassificationView classifications={classifications} onClassificationSelect={setSelectedClassification} totalItems={totalItems}
-                    page={page} onPaginationChange={(p) => setPage(p)} />
+                <PageClassificationView
+                    classifications={classifications}
+                    onClassificationSelect={(cl) => {
+                        setUrlParams(cl);
+                        setSelectedClassification(cl);
+                    }}
+                    totalItems={totalItems}
+                    page={page}
+                    onPaginationChange={(p) => {
+                        setPage(p); 
+                        history.replace({ pathname: `/page/${Number(pageId)}`, search: '?' + new URLSearchParams({ page: p.toString() }).toString() });
+                    }}
+                />
             </div>
         </div>
     );
 };
 
-const createStyles = () : { [key: string]: React.CSSProperties } => (
+const createStyles = (): { [key: string]: React.CSSProperties } => (
     {
         canvas: {
             position: 'absolute',
