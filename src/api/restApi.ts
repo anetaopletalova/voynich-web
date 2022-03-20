@@ -25,7 +25,7 @@ const baseURL = 'http://127.0.0.1:5000/';
 
 const customCamel = input => {
     const result =
-        (input.includes('_') ? camelCase(input) : input); // If not, translate incoming property names from snake to camel (only if it's really snake_case, i.e. look for the "_" character)
+        (input.includes('_') ? camelCase(input) : input);
     return result;
 };
 

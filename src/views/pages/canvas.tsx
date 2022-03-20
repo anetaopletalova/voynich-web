@@ -67,7 +67,9 @@ const Canvas: React.FC<ICanvasProps> = ({ pageHeight, pageWidth, polygons, pageN
     const showTooltip = () => {
         if (canvasMode) {
             if (selectedTooltip === null || !markings || !markings.length) return null;
-            const markingDescriptions = markings.map(item => item.description).join('\n');
+            const markingDescriptions = markings.map(item =>
+                `• ${item.description}`
+            ).join('\n');
 
             return (
                 <Label x={selectedTooltip.x} y={selectedTooltip.y} opacity={0.75}>

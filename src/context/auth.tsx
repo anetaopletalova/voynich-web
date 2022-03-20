@@ -28,10 +28,10 @@ export const AuthContext = createContext<IAuthContext>({
 let silentRefreshTimer;
 
 const getTimeoutFromToken = (token: string) => {
-    const decoded = decodeToken(token); // exp is in seconds-since-epoch (1970-01-01)
+    const decoded = decodeToken(token);
     const d = decoded as IDecodedToken;
-    const msToExpiration = d.exp * 1000 - Date.now(); // needs converting to ms
-    return msToExpiration - 5000; // we'll want to refresh 5s before expiration
+    const msToExpiration = d.exp * 1000 - Date.now();
+    return msToExpiration - 5000;
 };
 
 

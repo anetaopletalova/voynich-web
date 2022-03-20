@@ -8,7 +8,6 @@ import { AxiosError } from 'axios';
 import { Button, Theme, useTheme } from '@mui/material';
 
 const validationSchema = object({
-    //TODO add email() validation
     email: string().required(),
     password: string().required(),
 });

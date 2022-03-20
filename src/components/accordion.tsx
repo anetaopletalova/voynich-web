@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Theme, useTheme } from '@mui/material/styles';
 import { IPageClassification } from '../types/general';
 import Accordion from '@mui/material/Accordion';
@@ -11,7 +11,8 @@ import FavoriteStar from '../views/classifications/favorite';
 import NoteView from '../views/classifications/note';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import PersonIcon from '@mui/icons-material/Person';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
+const qs = require('query-string');
 
 interface IClassificationAccordionProps {
     classifications: IPageClassification[];
@@ -26,6 +27,20 @@ const ClassificationAccordion: React.FC<IClassificationAccordionProps> = ({ clas
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const history = useHistory();
+    const URLparams = useLocation();
+
+    useEffect(() => {
+        if (URLparams.search) {
+            const value = qs.parse(URLparams.search);
+            const selected = classifications.find(cl => cl.classificationId === Number(value.classificationId));
+            if (selected) {
+                setExpanded(selected.classificationId);
+                onClassificationSelect(selected);
+                onItemSelect(selected);
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [classifications]);
 
     const handleChange =
         (selected: IPageClassification) => (event: React.SyntheticEvent, newExpanded: boolean) => {

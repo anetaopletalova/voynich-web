@@ -20,7 +20,7 @@ declare module '@mui/material/styles' {
     interface SimplePaletteColorOptions {
         darker?: string;
     }
-    // allow configuration using `createTheme`
+
     interface ThemeOptions {
         status?: {
             danger?: string;
@@ -34,11 +34,13 @@ export const theme = createTheme({
     },
     palette: {
         primary: {
-            main: '#CC0055',
-            darker: '#053e85',
+            main: '#632626',
+        },
+        secondary: {
+            main: '#9D5353',
         },
         neutral: {
-            main: '#64748B',
+            main: '#BF8B67',
             contrastText: '#fff',
         },
     },
